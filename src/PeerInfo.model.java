@@ -9,13 +9,6 @@ class PeerInfo {
 
     }
 
-    public PeerInfo(int peerId, String hostName, int port, boolean file) {
-        this.peerId = peerId;
-        this.hostName = hostName;
-        this.port = port;
-        this.file = file;
-    }
-
     public String toString(){
         return peerId + " " + hostName + " " + port + " " + file;
     }

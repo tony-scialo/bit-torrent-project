@@ -7,6 +7,7 @@ import java.util.Scanner;
 class FileParser {
 
     public static final String PEER_INFO = "PeerInfo.cfg";
+    public static final String COMMON_FILE = "Common.cfg";
 
     public FileParser() {
 
@@ -19,19 +20,20 @@ class FileParser {
         return piList;
     }
 
-    private List<PeerInfo> convertRawToPeerInfo(String peerInfoRaw){
-        List<PeerInfo> piList = new ArrayList<>();
-        Scanner scan = new Scanner(peerInfoRaw);
-        String peerInfoOneLine = "";
-        // not sure if one line or multiple so combine into one line
-        while(scan.hasNextLine()){
-            peerInfoOneLine += scan.nextLine() + " ";
-        }
+    public Common parseCommonFile() throws Exception {
+        Common c;
+        String commonRaw = convertFileToString(COMMON_FILE);
+        c = convertRawToCommonFile(commonRaw);
+        return c;
+    }
 
+    private List<PeerInfo> convertRawToPeerInfo(String peerInfoRaw) {
+        List<PeerInfo> piList = new ArrayList<>();
+        String peerInfoOneLine = combineToOneLine(peerInfoRaw);
         String[] splitArray = peerInfoOneLine.split(" ");
         PeerInfo pi;
 
-        for(int x = 0; x < splitArray.length; x += 4){
+        for (int x = 0; x < splitArray.length; x += 4) {
             pi = new PeerInfo();
             pi.setPeerId(Integer.parseInt(splitArray[x]));
             pi.setHostName(splitArray[x + 1]);
@@ -39,12 +41,32 @@ class FileParser {
             pi.setFile((Integer.parseInt(splitArray[x + 3]) == 1));
             piList.add(pi);
         }
-
-        for (PeerInfo item : piList) {
-            System.out.println(item.toString());
-        }
-
         return piList;
+    }
+
+    private Common convertRawToCommonFile(String commonFileRaw) {
+        String commonOneLine = combineToOneLine(commonFileRaw);
+        String[] splitArray = commonOneLine.split(" ");
+        
+        Common c = new Common();
+        c.setNumNeighbors(Integer.parseInt(splitArray[1]));
+        c.setUnchoke(Integer.parseInt(splitArray[3]));
+        c.setOptimisticUnchoke(Integer.parseInt(splitArray[5]));
+        c.setFileName(splitArray[7]);
+        c.setFileSize(Long.parseLong(splitArray[9])); 
+        c.setPieceSize(Long.parseLong(splitArray[11]));       
+
+        return c;
+    }
+
+    private String combineToOneLine(String multilineString) {
+        Scanner scan = new Scanner(multilineString);
+        String oneLine = "";
+        // not sure if one line or multiple so combine into one line
+        while (scan.hasNextLine()) {
+            oneLine += scan.nextLine() + " ";
+        }
+        return oneLine;
     }
 
     private String convertFileToString(String filename) throws Exception {
