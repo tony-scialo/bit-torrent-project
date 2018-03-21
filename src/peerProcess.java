@@ -27,11 +27,32 @@ public class peerProcess {
             return;
         }
 
+        //print for demo
+        System.out.println("PeerInfo.cfg:");
+        for (PeerInfo pi : piList) {
+           System.out.println(pi.toString()); 
+        }
+
+        System.out.println("Common.cfg");
+        System.out.println(commonFile.toString());
+
         //figure out which peer you are
         peerIndex = PeerInfoUtil.findPeerInfoIndex(peerId, piList);
         if(peerIndex == -1){
             System.out.println("Error: couldn't find provided peer id in PeerInfo.cfg");
             return;
+        }
+
+        //if peer index == 0, just start listening on specified port
+        if(peerIndex == 0){
+            TorrentListener tl = new TorrentListener();
+            System.out.println("Listening on port: " + piList.get(peerIndex).getPort());
+            try{
+                tl.listenForRequests(1);
+            }catch(Exception e){
+                return;
+            }
+            
         }
     }
 }
