@@ -23,13 +23,51 @@ public class Logger {
         }
     }
 
-    public void logTcp(int peerId) throws Exception {
-        try {
-            pw.println(formatDate(new Date()) + " Peer " + hostId + " makes a connection to Peer " + peerId);
-        } catch (Exception e) {
-            closeAllWriters();
-            throw e;
-        }
+    public void logTcpFromHost(int peerId) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " makes a connection to Peer " + peerId + ".");
+    }
+
+    public void logTcpFromPeer(int peerId) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " is connected from " + peerId + ".");
+    }
+
+    /*TODO probs need to change how neighbors is passed in*/
+    public void logChangePreferredNeighbors(String neighborList) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " has the preferred neighbors " + neighborList + ".");
+    }
+
+    public void logChangeOptimisticUnchoked(int peerId) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " has the optimistically unchoked neighbor " + peerId + ".");
+    }
+
+    public void logUnchoked(int peerId) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " is unchoked by " + peerId + ".");
+    }
+
+    public void logChoked(int peerId) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " is choked by " + peerId + ".");
+    }
+
+    public void logHave(int peerId, int pieceIndex) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " recieved the 'have' message from " + peerId
+                + " for the piece " + pieceIndex + ".");
+    }
+
+    public void logInterested(int peerId) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " recieved the 'interested' message from " + peerId + ".");
+    }
+
+    public void logNotInterested(int peerId) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " recieved the 'not interested' message from " + peerId + ".");
+    }
+
+    public void logFinishPieceDownload(int peerId, int pieceIndex, int numPieces) throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " has downloaded the piece " + pieceIndex + " from " + peerId
+                + ". Now the number of pieces it has is " + numPieces + ".");
+    }
+
+    public void logDownloadComplete() throws Exception {
+        log(formatDate(new Date()) + " Peer " + hostId + " has downloaded the complete file.");
     }
 
     public void closeAllWriters() throws Exception {
@@ -38,6 +76,16 @@ public class Logger {
             fw.close();
         } catch (Exception e) {
             System.out.println("Error closing writers. " + e);
+            throw e;
+        }
+    }
+
+    private void log(String whatToLog) throws Exception {
+        try {
+            pw.println(whatToLog);
+        } catch (Exception e) {
+            System.out.println("Error logging to file. " + e);
+            closeAllWriters();
             throw e;
         }
     }

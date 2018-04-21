@@ -53,7 +53,17 @@ public class peerProcess {
         }
 
         try {
-            log.logTcp(1);
+            log.logTcpFromHost(1002);
+            log.logTcpFromPeer(1002);
+            log.logChangePreferredNeighbors("1002, 1003, 1004");
+            log.logChangeOptimisticUnchoked(1002);
+            log.logUnchoked(1002);
+            log.logChoked(1002);
+            log.logHave(1002, 1);
+            log.logInterested(1002);
+            log.logNotInterested(1002);
+            log.logFinishPieceDownload(1002, 1, 3);
+            log.logDownloadComplete();
             log.closeAllWriters();
         } catch (Exception e) {
             System.out.println("Error logging file");
