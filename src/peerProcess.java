@@ -46,7 +46,7 @@ public class peerProcess {
 
         // init the logger
         try {
-            log = new Logger(peerIndex);
+            log = new Logger(peerId);
         } catch (Exception e) {
             System.out.println("Error creating the logger");
             return;
