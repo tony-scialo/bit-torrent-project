@@ -55,16 +55,6 @@ public class peerProcess {
         }
 
         try {
-            log.logTcpFromHost(1002);
-            log.logTcpFromPeer(1002);
-            log.logChangePreferredNeighbors("1002, 1003, 1004");
-            log.logChangeOptimisticUnchoked(1002);
-            log.logUnchoked(1002);
-            log.logChoked(1002);
-            log.logHave(1002, 1);
-            log.logInterested(1002);
-            log.logNotInterested(1002);
-            log.logFinishPieceDownload(1002, 1, 3);
             log.logDownloadComplete();
             log.closeAllWriters();
         } catch (Exception e) {
@@ -74,15 +64,15 @@ public class peerProcess {
         // if peer index == 0, just start listening on specified port
         // else, you are a client and need to send requests to the other peer's that came before you
         if (peerIndex == 0) {
-            TorrentListener tl = new TorrentListener();
+            TorrentListener tl = new TorrentListener(log, host.getPort());
             System.out.println("Listening on port: " + piList.get(peerIndex).getPort());
             try {
-                tl.listenForRequests(host.getPort());
+                tl.listenForRequests();
             } catch (Exception e) {
                 return;
             }
         } else {
-            TorrentClient tl = new TorrentClient("localhost", host.getPort());
+            TorrentClient tl = new TorrentClient("localhost", host.getPort(), host);
             tl.run();
         }
     }

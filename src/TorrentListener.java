@@ -5,11 +5,15 @@ import java.nio.channels.*;
 import java.util.*;
 
 class TorrentListener {
-    public TorrentListener() {
+    private Logger log;
+    private int port;
 
+    public TorrentListener(Logger log, int port) {
+        this.log = log;
+        this.port = port;
     }
 
-    public void listenForRequests(int port) throws Exception {
+    public void listenForRequests() throws Exception {
         ServerSocket socket = new ServerSocket(port);
         int clientNum = 0;
         try {
@@ -42,6 +46,7 @@ class TorrentListener {
 
         public void run() {
             try {
+
                 //initialize Input and Output streams
                 out = new ObjectOutputStream(connection.getOutputStream());
                 out.flush();
