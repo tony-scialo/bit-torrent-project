@@ -8,6 +8,7 @@ public class peerProcess {
         List<PeerInfo> piList;
         Common commonFile;
         int peerIndex;
+        PeerInfo host;
         Logger log;
 
         if (args.length == 0) {
@@ -43,6 +44,7 @@ public class peerProcess {
             System.out.println("Error: couldn't find provided peer id in PeerInfo.cfg");
             return;
         }
+        host = piList.get(peerIndex);
 
         // init the logger
         try {
@@ -69,15 +71,19 @@ public class peerProcess {
             System.out.println("Error logging file");
         }
 
-        //if peer index == 0, just start listening on specified port
-        // if (peerIndex == 0) {
-        //     TorrentListener tl = new TorrentListener();
-        //     System.out.println("Listening on port: " + piList.get(peerIndex).getPort());
-        //     try {
-        //         tl.listenForRequests(1);
-        //     } catch (Exception e) {
-        //         return;
-        //     }
-        // }
+        // if peer index == 0, just start listening on specified port
+        // else, you are a client and need to send requests to the other peer's that came before you
+        if (peerIndex == 0) {
+            TorrentListener tl = new TorrentListener();
+            System.out.println("Listening on port: " + piList.get(peerIndex).getPort());
+            try {
+                tl.listenForRequests(host.getPort());
+            } catch (Exception e) {
+                return;
+            }
+        } else {
+            TorrentClient tl = new TorrentClient("localhost", host.getPort());
+            tl.run();
+        }
     }
 }
