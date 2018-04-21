@@ -6,19 +6,19 @@ import java.util.*;
 
 class TorrentListener {
     private Logger log;
-    private int port;
+    private PeerInfo host;
 
-    public TorrentListener(Logger log, int port) {
+    public TorrentListener(Logger log, PeerInfo host) {
         this.log = log;
-        this.port = port;
+        this.host = host;
     }
 
     public void listenForRequests() throws Exception {
-        ServerSocket socket = new ServerSocket(port);
+        ServerSocket socket = new ServerSocket(host.getPort());
         int clientNum = 0;
         try {
             while (true) {
-                new Handler(socket.accept(), clientNum).start();
+                new Handler(socket.accept(), clientNum, host).start();
                 clientNum++;
             }
         } finally {
@@ -39,28 +39,31 @@ class TorrentListener {
         private ObjectOutputStream out; //stream write to the socket
         private int no; //The index number of the client
 
-        public Handler(Socket connection, int no) {
+        private boolean recievedHandshake = false;
+        private PeerInfo connectedPeer;
+        private PeerInfo host;
+
+        public Handler(Socket connection, int no, PeerInfo host) {
             this.connection = connection;
             this.no = no;
+            this.host = host;
         }
 
         public void run() {
             try {
-
-                //initialize Input and Output streams
                 out = new ObjectOutputStream(connection.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(connection.getInputStream());
                 try {
                     while (true) {
-                        //receive the message sent from the client
                         message = (String) in.readObject();
-                        //show the message to the user
                         System.out.println("Receive message: " + message + " from client " + no);
-                        //Capitalize all letters in the message
-                        MESSAGE = message.toUpperCase();
-                        //send MESSAGE back to the client
-                        sendMessage(MESSAGE);
+
+                        if (!recievedHandshake) {
+                            connectedPeer = handshakeRecieved(message);
+                            HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
+                            sendMessage(hm.createHandshake());
+                        }
                     }
                 } catch (ClassNotFoundException classnot) {
                     System.err.println("Data received in unknown format");
@@ -88,6 +91,18 @@ class TorrentListener {
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
+        }
+
+        public PeerInfo handshakeRecieved(String message) {
+            HandshakeMessage hm = new HandshakeMessage();
+            connectedPeer = new PeerInfo();
+            connectedPeer.setPeerId(Integer.parseInt(hm.parseHandshake(message)));
+            return connectedPeer;
+        }
+
+        public void sendHandshake() {
+            HandshakeMessage hm = new HandshakeMessage();
+
         }
 
     }
