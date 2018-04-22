@@ -5,12 +5,15 @@ import java.nio.channels.*;
 import java.util.*;
 
 class TorrentListener {
-    private Logger log;
-    private PeerInfo host;
+    private static Logger log;
+    private static PeerInfo host;
 
-    public TorrentListener(Logger log, PeerInfo host) {
+    private static List<PeerInfo> piList;
+
+    public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList) {
         this.log = log;
         this.host = host;
+        TorrentListener.piList = piList;
     }
 
     public void listenForRequests() throws Exception {
@@ -65,7 +68,7 @@ class TorrentListener {
                             log.logTcpFromPeer(connectedPeer.getPeerId());
                             recievedHandshake = true;
                         } else {
-                            switch (getMessageType(message)) {
+                            switch (MessageUtil.getMessageType(message)) {
                             case 0:
                                 chokeRecieved();
                                 break;
@@ -82,7 +85,7 @@ class TorrentListener {
                                 haveRecieved();
                                 break;
                             case 5:
-                                bitfieldRecieved(message, host);
+                                bitfieldRecieved(message, host, connectedPeer, piList);
                                 break;
                             case 6:
                                 requestRecieved();
@@ -151,8 +154,10 @@ class TorrentListener {
             System.out.println("HAVE");
         }
 
-        public void bitfieldRecieved(String message, PeerInfo host) {
-            // respond w/ bitfield message
+        public void bitfieldRecieved(String message, PeerInfo host, PeerInfo conncetedPeer, List<PeerInfo> piList) {
+            // update bitfield of peer
+            int peerIndex = PeerInfoUtil.findPeerInfoIndex(connectedPeer.getPeerId(), piList);
+            piList.get(peerIndex).setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(message)));
             BitfieldMessage bm = new BitfieldMessage();
             sendMessage(bm.createBitfieldMessage(host.getBitfield()));
         }
@@ -163,10 +168,6 @@ class TorrentListener {
 
         public void pieceRecieved() {
             System.out.println("PIECE");
-        }
-
-        public int getMessageType(String message) {
-            return Integer.parseInt(message.substring(4, 5));
         }
     }
 }

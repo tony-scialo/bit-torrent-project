@@ -38,7 +38,10 @@ public class peerProcess {
         host = piList.get(peerIndex);
 
         // set up bitfield for host
-        host.setBitfield(PeerInfo.setUpBitfield(commonFile, host.hasFile()));
+        for (PeerInfo pi : piList) {
+            pi.setBitfield(PeerInfoUtil.createEmptyBitfield(commonFile));
+        }
+        host.setBitfield(PeerInfoUtil.setUpBitfield(commonFile, host.hasFile()));
 
         // init the logger
         try {
@@ -51,7 +54,7 @@ public class peerProcess {
         // if peer index == 0, just start listening on specified port
         // else, you are a client and need to send requests to the other peer's that came before you
         if (peerIndex == 0) {
-            TorrentListener tl = new TorrentListener(log, host);
+            TorrentListener tl = new TorrentListener(log, host, piList);
             System.out.println("Listening on port: " + piList.get(peerIndex).getPort());
             try {
                 tl.listenForRequests();
@@ -59,7 +62,7 @@ public class peerProcess {
                 return;
             }
         } else {
-            TorrentClient tl = new TorrentClient(host, piList.get(0), log);
+            TorrentClient tl = new TorrentClient(host, piList.get(0), log, piList);
             tl.run();
         }
     }

@@ -14,10 +14,13 @@ public class TorrentClient {
     private PeerInfo peer;
     private Logger log;
 
-    public TorrentClient(PeerInfo host, PeerInfo peer, Logger log) {
+    private static List<PeerInfo> piList;
+
+    public TorrentClient(PeerInfo host, PeerInfo peer, Logger log, List<PeerInfo> piList) {
         this.host = host;
         this.peer = peer;
         this.log = log;
+        TorrentClient.piList = piList;
     }
 
     void run() {
@@ -37,6 +40,8 @@ public class TorrentClient {
             sendBitfield(host);
             message = (String) in.readObject();
             System.out.println(message);
+
+            recieveBitfield(message, peer);
 
             if (isInterested(message, host)) {
                 sendInterested();
@@ -91,6 +96,12 @@ public class TorrentClient {
     public void sendBitfield(PeerInfo host) throws Exception {
         BitfieldMessage bm = new BitfieldMessage();
         sendMessage(bm.createBitfieldMessage(host.getBitfield()));
+    }
+
+    public void recieveBitfield(String message, PeerInfo peer) {
+        // update bitfield of peer
+        int peerIndex = PeerInfoUtil.findPeerInfoIndex(peer.getPeerId(), piList);
+        piList.get(peerIndex).setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(message)));
     }
 
     public boolean isInterested(String message, PeerInfo host) {

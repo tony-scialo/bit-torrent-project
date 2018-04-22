@@ -10,23 +10,13 @@ class PeerInfo {
 
     }
 
-    public static char[] setUpBitfield(Common commonFile, boolean hasFile) {
-        char[] bitfield = new char[commonFile.calcNumPieces()];
-        char hasFileChar;
-        if (hasFile) {
-            hasFileChar = '1';
-        } else {
-            hasFileChar = '0';
-        }
-        for (int x = 0; x < bitfield.length; x++) {
-            bitfield[x] = hasFileChar;
-        }
-
-        return bitfield;
-    }
-
     public String toString() {
-        return peerId + " " + hostName + " " + port + " " + file;
+        String bf = "";
+        for (char c : bitfield) {
+            bf += c;
+        }
+
+        return peerId + " " + hostName + " " + port + " " + file + "\n" + "bitfield: " + bf;
     }
 
     public int getPeerId() {
