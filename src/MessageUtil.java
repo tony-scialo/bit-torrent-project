@@ -1,9 +1,13 @@
 public class MessageUtil {
-    public static int getMessageType(String message) {
-        return Integer.parseInt(message.substring(4, 5));
+    public static int getMessageType(byte[] message) {
+        return Integer.parseInt(FileUtil.convertByteToString(message).substring(4, 5));
     }
 
     public static String getPayload(String message) {
         return message.substring(5);
+    }
+
+    public static String getPayload(byte[] byteMessage) {
+        return FileUtil.convertByteToString(byteMessage).substring(5);
     }
 }

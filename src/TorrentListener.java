@@ -73,34 +73,34 @@ class TorrentListener {
                             log.logTcpFromPeer(connectedPeer.getPeerId());
                             recievedHandshake = true;
                         } else {
-                            // switch (MessageUtil.getMessageType(message)) {
-                            // case 0:
-                            //     chokeRecieved();
-                            //     break;
-                            // case 1:
-                            //     unchokeRecieved();
-                            //     break;
-                            // case 2:
-                            //     interestedRecieved(log, connectedPeer);
-                            //     break;
-                            // case 3:
-                            //     notInterestedRecieved(log, connectedPeer);
-                            //     break;
-                            // case 4:
-                            //     haveRecieved();
-                            //     break;
-                            // case 5:
-                            //     bitfieldRecieved(message, host, connectedPeer);
-                            //     break;
-                            // case 6:
-                            //     requestRecieved();
-                            //     break;
-                            // case 7:
-                            //     pieceRecieved();
-                            //     break;
-                            // default:
-                            //     System.out.println("WRONG");
-                            // }
+                            switch (MessageUtil.getMessageType(byteMessage)) {
+                            case 0:
+                                chokeRecieved();
+                                break;
+                            case 1:
+                                unchokeRecieved();
+                                break;
+                            case 2:
+                                interestedRecieved(log, connectedPeer);
+                                break;
+                            case 3:
+                                notInterestedRecieved(log, connectedPeer);
+                                break;
+                            case 4:
+                                haveRecieved();
+                                break;
+                            case 5:
+                                bitfieldRecieved(byteMessage, host, connectedPeer);
+                                break;
+                            case 6:
+                                requestRecieved();
+                                break;
+                            case 7:
+                                pieceRecieved();
+                                break;
+                            default:
+                                System.out.println("WRONG");
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -175,13 +175,13 @@ class TorrentListener {
             System.out.println("HAVE");
         }
 
-        public void bitfieldRecieved(String message, PeerInfo host, PeerInfo conncetedPeer) {
+        public void bitfieldRecieved(byte[] byteMessage, PeerInfo host, PeerInfo conncetedPeer) {
             // update bitfield of peer
             int peerIndex = PeerInfoUtil.findPeerInfoIndex(connectedPeer.getPeerId(), piList);
             TorrentListener.piList.get(peerIndex)
-                    .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(message)));
+                    .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(byteMessage)));
             BitfieldMessage bm = new BitfieldMessage();
-            sendMessage(bm.createBitfieldMessage(host.getBitfield()));
+            sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
         }
 
         public void requestRecieved() {

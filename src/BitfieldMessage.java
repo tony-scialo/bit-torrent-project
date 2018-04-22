@@ -5,7 +5,7 @@ public class BitfieldMessage {
 
     }
 
-    public String createBitfieldMessage(char[] bitfield) {
+    public byte[] createBitfieldMessage(char[] bitfield) {
         int iLength = bitfield.length;
         String sLength;
         if (iLength <= 9) {
@@ -26,7 +26,7 @@ public class BitfieldMessage {
                 payload += "0";
             }
         }
-        return sLength + TYPE + payload;
+        return (sLength + TYPE + payload).getBytes();
     }
 
     public static char[] setUpBitfield(Common commonFile, boolean hasFile) {

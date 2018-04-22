@@ -42,11 +42,11 @@ public class TorrentClient {
             byteMessage = (byte[]) in.readObject();
             System.out.println(FileUtil.convertByteToString(byteMessage));
 
-            // sendBitfield(host);
-            // message = (String) in.readObject();
-            // System.out.println(message);
+            sendBitfield(host);
+            byteMessage = (byte[]) in.readObject();
+            System.out.println(FileUtil.convertByteToString(byteMessage));
 
-            // recieveBitfield(message, peer);
+            recieveBitfield(byteMessage, peer);
 
             // if (isInterested(message, host)) {
             //     sendInterested();
@@ -110,14 +110,14 @@ public class TorrentClient {
 
     public void sendBitfield(PeerInfo host) throws Exception {
         BitfieldMessage bm = new BitfieldMessage();
-        sendMessage(bm.createBitfieldMessage(host.getBitfield()));
+        sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
     }
 
-    public void recieveBitfield(String message, PeerInfo peer) {
+    public void recieveBitfield(byte[] byteMessage, PeerInfo peer) {
         // update bitfield of peer
         int peerIndex = PeerInfoUtil.findPeerInfoIndex(peer.getPeerId(), piList);
         TorrentClient.piList.get(peerIndex)
-                .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(message)));
+                .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(byteMessage)));
     }
 
     public boolean isInterested(String message, PeerInfo host) {
