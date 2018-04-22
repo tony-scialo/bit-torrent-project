@@ -51,6 +51,7 @@ public class peerProcess {
         if (host.hasFile()) {
             try {
                 file = FileUtil.fileToByteStream(filename);
+                FileUtil.createFileFromBytes(file, "testFile.txt");
             } catch (Exception e) {
                 System.out.println("Error w/ file, exiting program");
                 return;
