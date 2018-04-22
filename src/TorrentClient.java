@@ -109,12 +109,10 @@ public class TorrentClient {
     public void sendInterested() {
         InterestedMessage im = new InterestedMessage();
         sendMessage(im.createInterestedMessage());
-        System.out.println("INTERESTED");
     }
 
     public void sendUninterested() {
         NotInterestedMessage nm = new NotInterestedMessage();
         sendMessage(nm.createNotInterestedMessage());
-        System.out.println("UNINTERESTED");
     }
 }

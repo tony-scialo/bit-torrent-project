@@ -141,12 +141,10 @@ class TorrentListener {
 
         public void interestedRecieved(Logger log, PeerInfo peer) throws Exception {
             log.logInterested(peer.getPeerId());
-            System.out.println("INTERESTED");
         }
 
         public void notInterestedRecieved(Logger log, PeerInfo peer) throws Exception {
             log.logNotInterested(peer.getPeerId());
-            System.out.println("NOT INTERESTED");
         }
 
         public void haveRecieved() {
