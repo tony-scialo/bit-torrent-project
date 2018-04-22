@@ -6,7 +6,18 @@ public class BitfieldMessage {
     }
 
     public String createBitfieldMessage(boolean[] bitfield) {
-        String length = "9999";
+        int iLength = bitfield.length;
+        String sLength;
+        if (iLength <= 9) {
+            sLength = "000" + iLength;
+        } else if (iLength <= 99) {
+            sLength = "00" + iLength;
+        } else if (iLength <= 999) {
+            sLength = "0" + iLength;
+        } else {
+            sLength = Integer.toString(iLength);
+        }
+
         String payload = "";
 
         for (boolean b : bitfield) {
@@ -17,6 +28,6 @@ public class BitfieldMessage {
             }
         }
 
-        return length + TYPE + payload;
+        return sLength + TYPE + payload;
     }
 }

@@ -38,6 +38,12 @@ public class TorrentClient {
             message = (String) in.readObject();
             System.out.println(message);
 
+            if (isInterested(message, host)) {
+                sendInterested();
+            } else {
+                sendUninterested();
+            }
+
             // close the log
             log.closeAllWriters();
 
@@ -85,5 +91,17 @@ public class TorrentClient {
     public void sendBitfield(PeerInfo host) throws Exception {
         BitfieldMessage bm = new BitfieldMessage();
         sendMessage(bm.createBitfieldMessage(host.getBitfield()));
+    }
+
+    public boolean isInterested(String message, PeerInfo host) {
+        return false;
+    }
+
+    public void sendInterested() {
+        System.out.println("INTERESTED");
+    }
+
+    public void sendUninterested() {
+        System.out.println("UNINTERESTED");
     }
 }
