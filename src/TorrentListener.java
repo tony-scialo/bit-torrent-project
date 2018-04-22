@@ -76,7 +76,7 @@ class TorrentListener {
                                 interestedRecieved(log, connectedPeer);
                                 break;
                             case 3:
-                                notInterestedRecieved();
+                                notInterestedRecieved(log, connectedPeer);
                                 break;
                             case 4:
                                 haveRecieved();
@@ -144,7 +144,8 @@ class TorrentListener {
             System.out.println("INTERESTED");
         }
 
-        public void notInterestedRecieved() {
+        public void notInterestedRecieved(Logger log, PeerInfo peer) throws Exception {
+            log.logNotInterested(peer.getPeerId());
             System.out.println("NOT INTERESTED");
         }
 
