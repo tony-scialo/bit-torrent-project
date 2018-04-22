@@ -54,13 +54,6 @@ public class peerProcess {
             return;
         }
 
-        try {
-            log.logDownloadComplete();
-            log.closeAllWriters();
-        } catch (Exception e) {
-            System.out.println("Error logging file");
-        }
-
         // if peer index == 0, just start listening on specified port
         // else, you are a client and need to send requests to the other peer's that came before you
         if (peerIndex == 0) {
@@ -72,7 +65,7 @@ public class peerProcess {
                 return;
             }
         } else {
-            TorrentClient tl = new TorrentClient("localhost", host.getPort(), host);
+            TorrentClient tl = new TorrentClient(host, piList.get(0), log);
             tl.run();
         }
     }

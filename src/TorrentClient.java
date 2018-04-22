@@ -9,34 +9,38 @@ public class TorrentClient {
     ObjectOutputStream out; //stream write to the socket
     ObjectInputStream in; //stream read from the socket
     String message; //message send to the server
-    String MESSAGE; //capitalized message read from the server
 
-    private String hostname;
-    private int port;
+    private PeerInfo host;
     private PeerInfo peer;
+    private Logger log;
 
-    public TorrentClient(String hostname, int port, PeerInfo peer) {
-        this.hostname = hostname;
-        this.port = port;
+    public TorrentClient(PeerInfo host, PeerInfo peer, Logger log) {
+        this.host = host;
         this.peer = peer;
+        this.log = log;
     }
 
     void run() {
         try {
-            requestSocket = new Socket(hostname, port);
-            System.out.println("Connected to " + hostname + " in port " + port);
+            /* TODO CHANGE HOSTNAME TO NOT LOCALHOST */
+            requestSocket = new Socket("localhost", peer.getPort());
+            System.out.println("Connected to " + "localhost" + " in port " + peer.getPort());
             out = new ObjectOutputStream(requestSocket.getOutputStream());
             out.flush();
             in = new ObjectInputStream(requestSocket.getInputStream());
+
             // while (true) {
             // start with handshake
-            HandshakeMessage hm = new HandshakeMessage(peer.getPeerId());
+            HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
             sendMessage(hm.createHandshake());
-            //Receive the upperCase sentence from the server
-            MESSAGE = (String) in.readObject();
+            message = (String) in.readObject();
+            log.logTcpFromHost(peer.getPeerId());
+            log.closeAllWriters();
+
             //show the message to the user
-            System.out.println("Receive message: " + MESSAGE);
+            System.out.println("Receive message: " + message);
             // }
+
         } catch (ConnectException e) {
             System.err.println("Connection refused. You need to initiate a server first.");
         } catch (ClassNotFoundException e) {
@@ -45,6 +49,8 @@ public class TorrentClient {
             System.err.println("You are trying to connect to an unknown host!");
         } catch (IOException ioException) {
             ioException.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unknown error occured. " + e);
         } finally {
             //Close connections
             try {

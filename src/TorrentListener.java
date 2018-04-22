@@ -18,7 +18,7 @@ class TorrentListener {
         int clientNum = 0;
         try {
             while (true) {
-                new Handler(socket.accept(), clientNum, host).start();
+                new Handler(socket.accept(), clientNum, host, log).start();
                 clientNum++;
             }
         } finally {
@@ -33,7 +33,6 @@ class TorrentListener {
      	*/
     private static class Handler extends Thread {
         private String message; //message received from the client
-        private String MESSAGE; //uppercase message send to the client
         private Socket connection;
         private ObjectInputStream in; //stream read from the socket
         private ObjectOutputStream out; //stream write to the socket
@@ -42,11 +41,13 @@ class TorrentListener {
         private boolean recievedHandshake = false;
         private PeerInfo connectedPeer;
         private PeerInfo host;
+        private Logger log;
 
-        public Handler(Socket connection, int no, PeerInfo host) {
+        public Handler(Socket connection, int no, PeerInfo host, Logger log) {
             this.connection = connection;
             this.no = no;
             this.host = host;
+            this.log = log;
         }
 
         public void run() {
@@ -63,10 +64,13 @@ class TorrentListener {
                             connectedPeer = handshakeRecieved(message);
                             HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
                             sendMessage(hm.createHandshake());
+                            log.logTcpFromPeer(connectedPeer.getPeerId());
+                            log.closeAllWriters();
+                            recievedHandshake = true;
                         }
                     }
-                } catch (ClassNotFoundException classnot) {
-                    System.err.println("Data received in unknown format");
+                } catch (Exception e) {
+                    System.err.println("Error in process " + e);
                 }
             } catch (IOException ioException) {
                 System.out.println("Disconnect with Client " + no);
@@ -99,11 +103,5 @@ class TorrentListener {
             connectedPeer.setPeerId(Integer.parseInt(hm.parseHandshake(message)));
             return connectedPeer;
         }
-
-        public void sendHandshake() {
-            HandshakeMessage hm = new HandshakeMessage();
-
-        }
-
     }
 }
