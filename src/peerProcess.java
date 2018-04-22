@@ -12,6 +12,7 @@ public class peerProcess {
         Logger log;
 
         String filename;
+        byte[] file;
 
         if (args.length != 2) {
             System.out.println("Error: peer id and file to download not provided, closing program");
@@ -45,6 +46,16 @@ public class peerProcess {
             pi.setBitfield(PeerInfoUtil.createEmptyBitfield(commonFile));
         }
         host.setBitfield(PeerInfoUtil.setUpBitfield(commonFile, host.hasFile()));
+
+        //if host has file, create byte[] from it
+        if (host.hasFile()) {
+            try {
+                file = FileUtil.fileToByteStream(filename);
+            } catch (Exception e) {
+                System.out.println("Error w/ file, exiting program");
+                return;
+            }
+        }
 
         // init the logger
         try {
