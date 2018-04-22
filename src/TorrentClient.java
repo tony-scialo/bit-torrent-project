@@ -8,7 +8,6 @@ public class TorrentClient {
     Socket requestSocket; //socket connect to the server
     ObjectOutputStream out; //stream write to the socket
     ObjectInputStream in; //stream read from the socket
-    String message; //message send to the server
 
     private PeerInfo host;
     private PeerInfo peer;
@@ -78,17 +77,6 @@ public class TorrentClient {
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
-        }
-    }
-
-    //send a message to the output stream
-    void sendMessage(String msg) {
-        try {
-            //stream write the message
-            out.writeObject(msg);
-            out.flush();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
         }
     }
 

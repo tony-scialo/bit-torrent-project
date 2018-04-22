@@ -37,7 +37,6 @@ class TorrentListener {
      	* loop and are responsible for dealing with a single client's requests.
      	*/
     private static class Handler extends Thread {
-        private String message; //message received from the client
         private Socket connection;
         private ObjectInputStream in; //stream read from the socket
         private ObjectOutputStream out; //stream write to the socket
@@ -118,17 +117,6 @@ class TorrentListener {
                 } catch (Exception ioException) {
                     System.out.println("Disconnect with Client " + no);
                 }
-            }
-        }
-
-        //send a message to the output stream
-        public void sendMessage(String msg) {
-            try {
-                out.writeObject(msg);
-                out.flush();
-                System.out.println("Send message: " + msg + " to Client " + no);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
             }
         }
 

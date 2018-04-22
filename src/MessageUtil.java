@@ -3,10 +3,6 @@ public class MessageUtil {
         return Integer.parseInt(FileUtil.convertByteToString(message).substring(4, 5));
     }
 
-    public static String getPayload(String message) {
-        return message.substring(5);
-    }
-
     public static String getPayload(byte[] byteMessage) {
         return FileUtil.convertByteToString(byteMessage).substring(5);
     }
