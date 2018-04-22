@@ -21,7 +21,7 @@ public class FileUtil {
     }
 
     public static void printBytesAsString(byte[] data) {
-        System.out.println(new String(data, Charset.forName("ISO-8859-1")));
+        System.out.println(convertByteToString(data));
     }
 
     public static void createFileFromBytes(byte[] data, String filename) throws Exception {
@@ -38,6 +38,14 @@ public class FileUtil {
             throw e;
         }
 
+    }
+
+    public static byte[] convertStringToBytes(String payload) {
+        return payload.getBytes(Charset.forName("UTF-8"));
+    }
+
+    public static String convertByteToString(byte[] data) {
+        return new String(data, Charset.forName("ISO-8859-1"));
     }
 
 }

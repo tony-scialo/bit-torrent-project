@@ -51,11 +51,12 @@ public class peerProcess {
         if (host.hasFile()) {
             try {
                 file = FileUtil.fileToByteStream(filename);
-                FileUtil.createFileFromBytes(file, "testFile.txt");
             } catch (Exception e) {
                 System.out.println("Error w/ file, exiting program");
                 return;
             }
+        } else {
+            file = null;
         }
 
         // init the logger
@@ -69,7 +70,7 @@ public class peerProcess {
         // if peer index == 0, just start listening on specified port
         // else, you are a client and need to send requests to the other peer's that came before you
         if (peerIndex == 0) {
-            TorrentListener tl = new TorrentListener(log, host, piList);
+            TorrentListener tl = new TorrentListener(log, host, piList, file);
             System.out.println("Listening on port: " + piList.get(peerIndex).getPort());
             try {
                 tl.listenForRequests();

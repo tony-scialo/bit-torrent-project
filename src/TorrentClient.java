@@ -16,6 +16,8 @@ public class TorrentClient {
 
     private static List<PeerInfo> piList;
 
+    private byte[] byteMessage;
+
     public TorrentClient(PeerInfo host, PeerInfo peer, Logger log, List<PeerInfo> piList) {
         this.host = host;
         this.peer = peer;
@@ -32,25 +34,28 @@ public class TorrentClient {
             out.flush();
             in = new ObjectInputStream(requestSocket.getInputStream());
 
-            // while (true) {
+            //byte[] file = FileUtil.fileToByteStream("test.txt");
+            //sendByteMessage(file);
+
+            // // while (true) {
             sendHandshake(host, peer);
-            message = (String) in.readObject();
-            System.out.println(message);
+            byteMessage = (byte[]) in.readObject();
+            System.out.println(FileUtil.convertByteToString(byteMessage));
 
-            sendBitfield(host);
-            message = (String) in.readObject();
-            System.out.println(message);
+            // sendBitfield(host);
+            // message = (String) in.readObject();
+            // System.out.println(message);
 
-            recieveBitfield(message, peer);
+            // recieveBitfield(message, peer);
 
-            if (isInterested(message, host)) {
-                sendInterested();
-            } else {
-                sendUninterested();
-            }
+            // if (isInterested(message, host)) {
+            //     sendInterested();
+            // } else {
+            //     sendUninterested();
+            // }
 
-            // close the log
-            log.closeAllWriters();
+            // // close the log
+            // log.closeAllWriters();
 
             // }
 
@@ -87,9 +92,19 @@ public class TorrentClient {
         }
     }
 
+    void sendByteMessage(byte[] data) {
+        try {
+            //stream write the message
+            out.writeObject(data);
+            out.flush();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
     public void sendHandshake(PeerInfo host, PeerInfo peer) throws Exception {
         HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
-        sendMessage(hm.createHandshake());
+        sendByteMessage(hm.createHandshake());
         log.logTcpFromHost(peer.getPeerId());
     }
 
@@ -101,7 +116,8 @@ public class TorrentClient {
     public void recieveBitfield(String message, PeerInfo peer) {
         // update bitfield of peer
         int peerIndex = PeerInfoUtil.findPeerInfoIndex(peer.getPeerId(), piList);
-        piList.get(peerIndex).setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(message)));
+        TorrentClient.piList.get(peerIndex)
+                .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(message)));
     }
 
     public boolean isInterested(String message, PeerInfo host) {
@@ -120,6 +136,18 @@ public class TorrentClient {
     public void sendInterested() {
         InterestedMessage im = new InterestedMessage();
         sendMessage(im.createInterestedMessage());
+
+        try {
+            message = (String) in.readObject();
+            System.out.println(message);
+
+            FileUtil.createFileFromBytes(FileUtil.convertStringToBytes(MessageUtil.getPayload(message)),
+                    "willThisWork.txt");
+
+        } catch (Exception e) {
+
+        }
+
     }
 
     public void sendUninterested() {

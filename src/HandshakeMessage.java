@@ -11,8 +11,8 @@ public class HandshakeMessage {
         this.peerId = peerId;
     }
 
-    public String createHandshake() {
-        return HEADER + ZERO_BITS + peerId;
+    public byte[] createHandshake() {
+        return (HEADER + ZERO_BITS + peerId).getBytes();
     }
 
     public String parseHandshake(String handshake) {
