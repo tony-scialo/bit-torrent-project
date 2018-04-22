@@ -35,10 +35,17 @@ public class TorrentClient {
             sendMessage(hm.createHandshake());
             message = (String) in.readObject();
             log.logTcpFromHost(peer.getPeerId());
+
+            // send the bitfield
+            BitfieldMessage bm = new BitfieldMessage();
+            sendMessage(bm.createBitfieldMessage(host.getBitfield()));
+
+            message = (String) in.readObject();
+            System.out.println(message);
+
+            // close the log
             log.closeAllWriters();
 
-            //show the message to the user
-            System.out.println("Receive message: " + message);
             // }
 
         } catch (ConnectException e) {

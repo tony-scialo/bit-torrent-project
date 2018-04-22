@@ -67,6 +67,35 @@ class TorrentListener {
                             log.logTcpFromPeer(connectedPeer.getPeerId());
                             log.closeAllWriters();
                             recievedHandshake = true;
+                        } else {
+                            switch (getMessageType(message)) {
+                            case 0:
+                                chokeRecieved();
+                                break;
+                            case 1:
+                                unchokeRecieved();
+                                break;
+                            case 2:
+                                interestedRecieved();
+                                break;
+                            case 3:
+                                notInterestedRecieved();
+                                break;
+                            case 4:
+                                haveRecieved();
+                                break;
+                            case 5:
+                                bitfieldRecieved(message, host);
+                                break;
+                            case 6:
+                                requestRecieved();
+                                break;
+                            case 7:
+                                pieceRecieved();
+                                break;
+                            default:
+                                System.out.println("WRONG");
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -102,6 +131,47 @@ class TorrentListener {
             connectedPeer = new PeerInfo();
             connectedPeer.setPeerId(Integer.parseInt(hm.parseHandshake(message)));
             return connectedPeer;
+        }
+
+        public void chokeRecieved() {
+            System.out.println("CHOKE");
+        }
+
+        public void unchokeRecieved() {
+            System.out.println("UNCHOKE");
+        }
+
+        public void interestedRecieved() {
+            System.out.println("INTERESTED");
+        }
+
+        public void notInterestedRecieved() {
+            System.out.println("NOT INTERESTED");
+        }
+
+        public void haveRecieved() {
+            System.out.println("HAVE");
+        }
+
+        public void bitfieldRecieved(String message, PeerInfo host) {
+            // respond w/ bitfield message
+            BitfieldMessage bm = new BitfieldMessage();
+            sendMessage(bm.createBitfieldMessage(host.getBitfield()));
+
+            System.out.println(message);
+            System.out.println("BITFIELD");
+        }
+
+        public void requestRecieved() {
+            System.out.println("REQUEST");
+        }
+
+        public void pieceRecieved() {
+            System.out.println("PIECE");
+        }
+
+        public int getMessageType(String message) {
+            return Integer.parseInt(message.substring(4, 5));
         }
     }
 }
