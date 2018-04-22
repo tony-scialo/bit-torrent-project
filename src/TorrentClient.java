@@ -94,6 +94,11 @@ public class TorrentClient {
     }
 
     public boolean isInterested(String message, PeerInfo host) {
+        String payload = message.substring(5);
+        char[] peerBitfield = BitfieldMessage.convertPayloadToBitfield(payload);
+        for (char c : peerBitfield) {
+            System.out.println(c);
+        }
         return false;
     }
 

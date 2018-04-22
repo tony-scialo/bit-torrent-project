@@ -4,7 +4,7 @@ class PeerInfo {
     private int port;
     private boolean file;
     private String rawString;
-    private boolean[] bitfield;
+    private char[] bitfield;
 
     public PeerInfo() {
 
@@ -54,11 +54,11 @@ class PeerInfo {
         this.rawString = rawString;
     }
 
-    public void setBitfield(boolean[] bitfield) {
+    public void setBitfield(char[] bitfield) {
         this.bitfield = bitfield;
     }
 
-    public boolean[] getBitfield() {
+    public char[] getBitfield() {
         return bitfield;
     }
 }

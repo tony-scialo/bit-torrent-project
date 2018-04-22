@@ -5,7 +5,7 @@ public class BitfieldMessage {
 
     }
 
-    public String createBitfieldMessage(boolean[] bitfield) {
+    public String createBitfieldMessage(char[] bitfield) {
         int iLength = bitfield.length;
         String sLength;
         if (iLength <= 9) {
@@ -19,15 +19,17 @@ public class BitfieldMessage {
         }
 
         String payload = "";
-
-        for (boolean b : bitfield) {
-            if (b) {
+        for (char b : bitfield) {
+            if (b == '1') {
                 payload += "1";
             } else {
                 payload += "0";
             }
         }
-
         return sLength + TYPE + payload;
+    }
+
+    public static char[] convertPayloadToBitfield(String payload) {
+        return payload.toCharArray();
     }
 }

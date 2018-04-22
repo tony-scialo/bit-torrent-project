@@ -38,10 +38,10 @@ public class peerProcess {
         host = piList.get(peerIndex);
 
         // set up bitfield for host
-        boolean[] bitfield = new boolean[commonFile.calcNumPieces()];
+        char[] bitfield = new char[commonFile.calcNumPieces()];
         if (host.hasFile()) {
             for (int x = 0; x < bitfield.length; x++) {
-                bitfield[x] = true;
+                bitfield[x] = '1';
             }
         }
         host.setBitfield(bitfield);
