@@ -29,6 +29,21 @@ public class BitfieldMessage {
         return sLength + TYPE + payload;
     }
 
+    public static char[] setUpBitfield(Common commonFile, boolean hasFile) {
+        char[] bitfield = new char[commonFile.calcNumPieces()];
+        char hasFileChar;
+        if (hasFile) {
+            hasFileChar = '1';
+        } else {
+            hasFileChar = '0';
+        }
+        for (int x = 0; x < bitfield.length; x++) {
+            bitfield[x] = hasFileChar;
+        }
+
+        return bitfield;
+    }
+
     public static char[] convertPayloadToBitfield(String payload) {
         return payload.toCharArray();
     }
