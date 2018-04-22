@@ -4,52 +4,61 @@ class PeerInfo {
     private int port;
     private boolean file;
     private String rawString;
+    private boolean[] bitfield;
 
     public PeerInfo() {
 
     }
 
-    public String toString(){
+    public String toString() {
         return peerId + " " + hostName + " " + port + " " + file;
     }
 
-    public int getPeerId(){
+    public int getPeerId() {
         return peerId;
     }
 
-    public void setPeerId(int peerId){
+    public void setPeerId(int peerId) {
         this.peerId = peerId;
     }
 
-    public String getHostName(){
+    public String getHostName() {
         return hostName;
     }
 
-    public void setHostName(String hostName){
+    public void setHostName(String hostName) {
         this.hostName = hostName;
     }
 
-    public int getPort(){
+    public int getPort() {
         return port;
     }
 
-    public void setPort(int port){
+    public void setPort(int port) {
         this.port = port;
     }
 
-    public boolean hasFile(){
+    public boolean hasFile() {
         return file;
     }
 
-    public void setFile(boolean file){
+    public void setFile(boolean file) {
         this.file = file;
     }
 
-    public String getRawString(){
+    public String getRawString() {
         return rawString;
     }
 
-    public void setRawString(String rawString){
+    public void setRawString(String rawString) {
         this.rawString = rawString;
+    }
+
+    public void setBitfield(boolean[] bitfield) {
+        this.bitfield = bitfield;
+    }
+
+    public boolean[] getBitfield() {
+        return bitfield;
     }
 }

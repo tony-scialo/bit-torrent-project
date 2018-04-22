@@ -29,15 +29,6 @@ public class peerProcess {
             return;
         }
 
-        //print for demo
-        System.out.println("PeerInfo.cfg:");
-        for (PeerInfo pi : piList) {
-            System.out.println(pi.toString());
-        }
-
-        System.out.println("Common.cfg");
-        System.out.println(commonFile.toString());
-
         //figure out which peer you are
         peerIndex = PeerInfoUtil.findPeerInfoIndex(peerId, piList);
         if (peerIndex == -1) {
@@ -45,6 +36,15 @@ public class peerProcess {
             return;
         }
         host = piList.get(peerIndex);
+
+        // set up bitfield for host
+        boolean[] bitfield = new boolean[commonFile.calcNumPieces()];
+        if (host.hasFile()) {
+            for (int x = 0; x < bitfield.length; x++) {
+                bitfield[x] = true;
+            }
+        }
+        host.setBitfield(bitfield);
 
         // init the logger
         try {

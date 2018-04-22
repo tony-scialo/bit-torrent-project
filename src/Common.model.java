@@ -10,44 +10,48 @@ class Common {
 
     }
 
-    public String toString() {
-        return numNeighbors + " " + unchoke + " " + optimisticUnchoke + 
-            " " + fileName + " " + fileSize + " " + pieceSize;
+    public int calcNumPieces() {
+        return (int) Math.ceil((double) fileSize / pieceSize);
     }
 
-    public int getNumNeighbors(){
+    public String toString() {
+        return numNeighbors + " " + unchoke + " " + optimisticUnchoke + " " + fileName + " " + fileSize + " "
+                + pieceSize;
+    }
+
+    public int getNumNeighbors() {
         return numNeighbors;
     }
 
-    public void setNumNeighbors(int numNeighbors){
+    public void setNumNeighbors(int numNeighbors) {
         this.numNeighbors = numNeighbors;
     }
 
-    public int getUnchoke(){
+    public int getUnchoke() {
         return unchoke;
     }
 
-    public void setUnchoke(int unchoke){
+    public void setUnchoke(int unchoke) {
         this.unchoke = unchoke;
     }
 
-    public int getOptimisticUnchoke(){
+    public int getOptimisticUnchoke() {
         return optimisticUnchoke;
     }
 
-    public void setOptimisticUnchoke(int optimisticUnchoke){
+    public void setOptimisticUnchoke(int optimisticUnchoke) {
         this.optimisticUnchoke = optimisticUnchoke;
     }
 
-    public String getFilename(){
+    public String getFilename() {
         return fileName;
     }
 
-    public void setFileName(String fileName){
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    public long getFileSize(){
+    public long getFileSize() {
         return fileSize;
     }
 
@@ -55,7 +59,7 @@ class Common {
         this.fileSize = fileSize;
     }
 
-    public long getPieceSize(){
+    public long getPieceSize() {
         return pieceSize;
     }
 
