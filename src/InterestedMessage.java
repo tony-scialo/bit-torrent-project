@@ -5,7 +5,7 @@ public class InterestedMessage {
 
     }
 
-    public String createInterestedMessage() {
-        return "0000" + TYPE;
+    public byte[] createInterestedMessage() {
+        return ("0000" + TYPE).getBytes();
     }
 }

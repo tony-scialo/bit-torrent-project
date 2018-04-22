@@ -160,15 +160,12 @@ class TorrentListener {
 
         public void interestedRecieved(Logger log, PeerInfo peer) throws Exception {
             log.logInterested(peer.getPeerId());
-
-            // testing for now to make sure client can get bits and create file
-            String test = file.toString();
-            sendMessage(test);
-
+            System.out.println("INTERESTED");
         }
 
         public void notInterestedRecieved(Logger log, PeerInfo peer) throws Exception {
             log.logNotInterested(peer.getPeerId());
+            System.out.println("NOT INTERESTED");
         }
 
         public void haveRecieved() {

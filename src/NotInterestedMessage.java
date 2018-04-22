@@ -6,7 +6,7 @@ public class NotInterestedMessage {
 
     }
 
-    public String createNotInterestedMessage() {
-        return "0000" + TYPE;
+    public byte[] createNotInterestedMessage() {
+        return ("0000" + TYPE).getBytes();
     }
 }

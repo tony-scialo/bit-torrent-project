@@ -48,14 +48,14 @@ public class TorrentClient {
 
             recieveBitfield(byteMessage, peer);
 
-            // if (isInterested(message, host)) {
-            //     sendInterested();
-            // } else {
-            //     sendUninterested();
-            // }
+            if (isInterested(byteMessage, host)) {
+                sendInterested();
+            } else {
+                sendUninterested();
+            }
 
-            // // close the log
-            // log.closeAllWriters();
+            // close the log
+            log.closeAllWriters();
 
             // }
 
@@ -120,8 +120,8 @@ public class TorrentClient {
                 .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(byteMessage)));
     }
 
-    public boolean isInterested(String message, PeerInfo host) {
-        String payload = message.substring(5);
+    public boolean isInterested(byte[] byteMessage, PeerInfo host) {
+        String payload = MessageUtil.getPayload(byteMessage);
         char[] peerBitfield = BitfieldMessage.convertPayloadToBitfield(payload);
 
         int x = 0;
@@ -135,23 +135,23 @@ public class TorrentClient {
 
     public void sendInterested() {
         InterestedMessage im = new InterestedMessage();
-        sendMessage(im.createInterestedMessage());
+        sendByteMessage(im.createInterestedMessage());
 
-        try {
-            message = (String) in.readObject();
-            System.out.println(message);
+        // try {
+        //     message = (String) in.readObject();
+        //     System.out.println(message);
 
-            FileUtil.createFileFromBytes(FileUtil.convertStringToBytes(MessageUtil.getPayload(message)),
-                    "willThisWork.txt");
+        //     FileUtil.createFileFromBytes(FileUtil.convertStringToBytes(MessageUtil.getPayload(message)),
+        //             "willThisWork.txt");
 
-        } catch (Exception e) {
+        // } catch (Exception e) {
 
-        }
+        // }
 
     }
 
     public void sendUninterested() {
         NotInterestedMessage nm = new NotInterestedMessage();
-        sendMessage(nm.createNotInterestedMessage());
+        sendByteMessage(nm.createNotInterestedMessage());
     }
 }
