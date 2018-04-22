@@ -107,6 +107,8 @@ public class TorrentClient {
     }
 
     public void sendInterested() {
+        InterestedMessage im = new InterestedMessage();
+        sendMessage(im.createInterestedMessage());
         System.out.println("INTERESTED");
     }
 

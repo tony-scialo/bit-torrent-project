@@ -58,14 +58,11 @@ class TorrentListener {
                 try {
                     while (true) {
                         message = (String) in.readObject();
-                        System.out.println("Receive message: " + message + " from client " + no);
-
                         if (!recievedHandshake) {
                             connectedPeer = handshakeRecieved(message);
                             HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
                             sendMessage(hm.createHandshake());
                             log.logTcpFromPeer(connectedPeer.getPeerId());
-                            log.closeAllWriters();
                             recievedHandshake = true;
                         } else {
                             switch (getMessageType(message)) {
@@ -76,7 +73,7 @@ class TorrentListener {
                                 unchokeRecieved();
                                 break;
                             case 2:
-                                interestedRecieved();
+                                interestedRecieved(log, connectedPeer);
                                 break;
                             case 3:
                                 notInterestedRecieved();
@@ -106,10 +103,11 @@ class TorrentListener {
             } finally {
                 //Close connections
                 try {
+                    log.closeAllWriters();
                     in.close();
                     out.close();
                     connection.close();
-                } catch (IOException ioException) {
+                } catch (Exception ioException) {
                     System.out.println("Disconnect with Client " + no);
                 }
             }
@@ -141,7 +139,8 @@ class TorrentListener {
             System.out.println("UNCHOKE");
         }
 
-        public void interestedRecieved() {
+        public void interestedRecieved(Logger log, PeerInfo peer) throws Exception {
+            log.logInterested(peer.getPeerId());
             System.out.println("INTERESTED");
         }
 
@@ -157,9 +156,6 @@ class TorrentListener {
             // respond w/ bitfield message
             BitfieldMessage bm = new BitfieldMessage();
             sendMessage(bm.createBitfieldMessage(host.getBitfield()));
-
-            System.out.println(message);
-            System.out.println("BITFIELD");
         }
 
         public void requestRecieved() {
