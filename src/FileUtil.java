@@ -1,6 +1,7 @@
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.nio.charset.Charset;
 
 public class FileUtil {
 
@@ -15,7 +16,10 @@ public class FileUtil {
             System.out.println("Error converting file to byte[]. " + e);
             throw e;
         }
+    }
 
+    public static void printBytesAsString(byte[] data) {
+        System.out.println(new String(data, Charset.forName("ISO-8859-1")));
     }
 
 }
