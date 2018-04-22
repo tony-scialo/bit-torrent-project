@@ -30,16 +30,11 @@ public class TorrentClient {
             in = new ObjectInputStream(requestSocket.getInputStream());
 
             // while (true) {
-            // start with handshake
-            HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
-            sendMessage(hm.createHandshake());
+            sendHandshake(host, peer);
             message = (String) in.readObject();
-            log.logTcpFromHost(peer.getPeerId());
+            System.out.println(message);
 
-            // send the bitfield
-            BitfieldMessage bm = new BitfieldMessage();
-            sendMessage(bm.createBitfieldMessage(host.getBitfield()));
-
+            sendBitfield(host);
             message = (String) in.readObject();
             System.out.println(message);
 
@@ -79,5 +74,16 @@ public class TorrentClient {
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
+    }
+
+    public void sendHandshake(PeerInfo host, PeerInfo peer) throws Exception {
+        HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
+        sendMessage(hm.createHandshake());
+        log.logTcpFromHost(peer.getPeerId());
+    }
+
+    public void sendBitfield(PeerInfo host) throws Exception {
+        BitfieldMessage bm = new BitfieldMessage();
+        sendMessage(bm.createBitfieldMessage(host.getBitfield()));
     }
 }
