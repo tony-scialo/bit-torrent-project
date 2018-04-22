@@ -11,12 +11,15 @@ public class peerProcess {
         PeerInfo host;
         Logger log;
 
-        if (args.length == 0) {
-            System.out.println("Error: peer id not provided, closing program");
+        String filename;
+
+        if (args.length != 2) {
+            System.out.println("Error: peer id and file to download not provided, closing program");
             return;
         }
 
         peerId = Integer.parseInt(args[0]);
+        filename = args[1];
 
         // parse the 2 files Common.cfg and PeerInfo.cfg
         FileParser parser = new FileParser();
