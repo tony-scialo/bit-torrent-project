@@ -17,6 +17,8 @@ public class TorrentClient {
 
     private byte[] byteMessage;
 
+    private boolean isChoked = true;
+
     public TorrentClient(PeerInfo host, PeerInfo peer, Logger log, List<PeerInfo> piList) {
         this.host = host;
         this.peer = peer;
@@ -127,6 +129,7 @@ public class TorrentClient {
 
     public void unchokeRecieved(PeerInfo peer) {
         System.out.println("UNCHOKE");
+        isChoked = false;
         // if doesn't have the complete file, send request message
         if (!host.hasFile()) {
             sendRequest(peer);
@@ -192,9 +195,11 @@ public class TorrentClient {
     }
 
     public void sendRequest(PeerInfo peer) {
-        String neededIndex = PeerInfoUtil.determineNextNeededPiece(peer);
-        RequestMessage rm = new RequestMessage();
-        sendByteMessage(rm.createRequestMessage(neededIndex));
+        if (!isChoked) {
+            String neededIndex = PeerInfoUtil.determineNextNeededPiece(peer);
+            RequestMessage rm = new RequestMessage();
+            sendByteMessage(rm.createRequestMessage(neededIndex));
+        }
     }
 
 }
