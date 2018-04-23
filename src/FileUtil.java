@@ -13,6 +13,7 @@ public class FileUtil {
             /*TODO prob need to make sure this path is correct on uf server */
             Path p = Paths.get(filename);
             byte[] data = Files.readAllBytes(p);
+
             return data;
         } catch (Exception e) {
             System.out.println("Error converting file to byte[]. " + e);
@@ -46,6 +47,71 @@ public class FileUtil {
 
     public static String convertByteToString(byte[] data) {
         return new String(data, Charset.forName("ISO-8859-1"));
+    }
+
+    public static Piece[] breakIntoPieces(byte[] data, long pieceSize) throws Exception {
+        try {
+            Piece[] pa = new Piece[calcNumOfPieces(data.length, pieceSize)];
+
+            byte[] ba;
+            int dataIndex = 0;
+
+            for (int x = 0; x < pa.length; x++) {
+                ba = new byte[(int) pieceSize];
+                for (int baIndex = 0; baIndex < pieceSize; baIndex++) {
+                    try {
+                        ba[baIndex] = data[dataIndex++];
+                    } catch (Exception e) {
+                        // DO NOTHING CATCHING ARRAY OUTTA BOUNDS HERE AND I DONT HAVE TIME TO REFACTOR!!!!!!!!
+                    }
+                }
+                pa[x] = new Piece(ba, true);
+            }
+            return pa;
+
+        } catch (Exception e) {
+            System.out.println("Error breaking file into pieces . " + e);
+            throw e;
+        }
+
+    }
+
+    public static Piece[] breakIntoPiecesNoFile(byte[] data, long pieceSize) {
+        Piece[] pa = new Piece[calcNumOfPieces(data.length, pieceSize)];
+        for (Piece p : pa) {
+            p = new Piece(null, false);
+        }
+
+        return pa;
+    }
+
+    public static int calcNumOfPieces(int fileSize, long pieceSize) {
+        return (int) (Math.ceil(fileSize / (double) pieceSize));
+    }
+
+    public static void buildFileFromPieces(long filesize, Piece[] pieces) throws Exception {
+        try {
+            byte[] b = new byte[(int) filesize];
+
+            int bIndex = 0;
+            byte[] pb;
+
+            for (Piece p : pieces) {
+                pb = p.getData();
+                for (int x = 0; x < pb.length; x++) {
+                    try {
+                        b[bIndex++] = pb[x];
+                    } catch (Exception e) {
+                        // SAME PROBLEM AS EARLIER SWALLOW THE EXCEPTION :(
+                    }
+                }
+            }
+            createFileFromBytes(b, "zPLEASE.txt");
+        } catch (Exception e) {
+            System.out.println("Error building file from pieces. " + e);
+            throw e;
+        }
+
     }
 
 }

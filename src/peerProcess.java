@@ -13,6 +13,7 @@ public class peerProcess {
 
         String filename;
         byte[] file;
+        Piece[] pieces;
 
         if (args.length != 2) {
             System.out.println("Error: peer id and file to download not provided, closing program");
@@ -51,12 +52,14 @@ public class peerProcess {
         if (host.hasFile()) {
             try {
                 file = FileUtil.fileToByteStream(filename);
+                pieces = FileUtil.breakIntoPieces(file, commonFile.getPieceSize());
             } catch (Exception e) {
                 System.out.println("Error w/ file, exiting program");
                 return;
             }
         } else {
             file = null;
+            pieces = FileUtil.breakIntoPiecesNoFile(file, commonFile.getPieceSize());
         }
 
         // init the logger
