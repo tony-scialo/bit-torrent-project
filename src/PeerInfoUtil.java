@@ -39,12 +39,12 @@ class PeerInfoUtil {
         return payload.toCharArray();
     }
 
-    public static String determineNextNeededPiece(PeerInfo peer) {
+    public static String determineNextNeededPiece(PeerInfo host) {
 
         // find next needed piece
         int neededIndex = 0;
-        for (int x = 0; x < peer.getBitfield().length; x++) {
-            if (peer.getBitfield()[x] == '0' && !isAlreadyRequested(peer.getBitRequested(), x)) {
+        for (int x = 0; x < host.getBitfield().length; x++) {
+            if (host.getBitfield()[x] == '0' && !isAlreadyRequested(host.getBitRequested(), x)) {
                 neededIndex = x;
                 break;
             }
@@ -70,6 +70,15 @@ class PeerInfoUtil {
             return true;
         else
             return false;
+    }
+
+    public static boolean hasAllPieces(char[] bitfield) {
+        for (char c : bitfield) {
+            if (c == '0')
+                return false;
+        }
+
+        return true;
     }
 
 }

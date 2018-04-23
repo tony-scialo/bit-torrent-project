@@ -176,6 +176,7 @@ class TorrentListener {
         }
 
         public void requestRecieved(byte[] byteMessage, PeerInfo host) {
+            System.out.print("REQUEST: ");
             FileUtil.printBytesAsString(byteMessage);
 
             // if it has the piece, send it
@@ -183,8 +184,6 @@ class TorrentListener {
             if (PeerInfoUtil.peerHasPiece(host.getBitfield(), Integer.parseInt(pieceIndex))) {
                 sendPiece(pieceIndex, TorrentListener.pieces[Integer.parseInt(pieceIndex)].getData());
             }
-
-            System.out.println("REQUEST");
         }
 
         public void pieceRecieved() {
@@ -197,9 +196,9 @@ class TorrentListener {
         }
 
         public void sendPiece(String pieceIndex, byte[] data) {
+            System.out.println("PIECE SENT: " + pieceIndex);
             PieceMessage pm = new PieceMessage();
             sendByteMessage(pm.createPieceMessage(pieceIndex, data));
-            System.out.println("PIECE SENT");
         }
 
     }

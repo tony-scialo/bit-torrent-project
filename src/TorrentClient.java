@@ -193,6 +193,7 @@ public class TorrentClient {
 
             // figure out which piece it is
             int pieceIndex = MessageUtil.getPieceIndexFromPieceMessage(byteMessage);
+            System.out.println("PieceIndex: " + pieceIndex);
 
             // get data and set it to piece
             TorrentClient.pieces[pieceIndex].setData(Arrays.copyOfRange(byteMessage, 8, byteMessage.length));
@@ -200,8 +201,17 @@ public class TorrentClient {
             // set has piece to true
             TorrentClient.pieces[pieceIndex].setHasPiece(true);
 
-            // send another request
-            // sendRequest(peer);
+            // update its own bitfield
+            TorrentClient.host.getBitfield()[pieceIndex] = '1';
+
+            boolean hasAllPieces = PeerInfoUtil.hasAllPieces(TorrentClient.host.getBitfield());
+
+            if (!hasAllPieces) {
+                // send another request
+                sendRequest();
+            } else {
+                System.out.println("NEED TO FIGURE OUT WHAT TO DO HERE");
+            }
 
         }
 
@@ -228,7 +238,7 @@ public class TorrentClient {
 
         public void sendRequest() {
             if (!isChoked) {
-                String neededIndex = PeerInfoUtil.determineNextNeededPiece(peer);
+                String neededIndex = PeerInfoUtil.determineNextNeededPiece(TorrentClient.host);
                 RequestMessage rm = new RequestMessage();
                 sendByteMessage(rm.createRequestMessage(neededIndex));
             }

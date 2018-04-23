@@ -22,6 +22,9 @@ public class MessageUtil {
     }
 
     public static int getPieceIndexFromPieceMessage(byte[] byteMessage) {
-        return Integer.parseInt(getPayload(byteMessage).substring(0, 3));
+
+        System.out.println("Payload: " + getPayload(byteMessage) + ", " + getPayload(byteMessage).substring(0, 4));
+
+        return Integer.parseInt(getPayload(byteMessage).substring(0, 4));
     }
 }
