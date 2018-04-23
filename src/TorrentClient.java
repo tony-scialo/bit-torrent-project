@@ -11,6 +11,7 @@ public class TorrentClient {
     private static List<PeerInfo> piList;
     private static Piece[] pieces;
     private static Common commonFile;
+    private static List<String> strLog = new ArrayList<>();
 
     public TorrentClient(PeerInfo host, Logger log, List<PeerInfo> piList, Piece[] pieces, Common commonFile) {
         TorrentClient.host = host;
@@ -195,7 +196,6 @@ public class TorrentClient {
 
             // figure out which piece it is
             int pieceIndex = MessageUtil.getPieceIndexFromPieceMessage(byteMessage);
-            System.out.println("PieceIndex: " + pieceIndex);
 
             // get data and set it to piece
             TorrentClient.pieces[pieceIndex].setData(MessageUtil.getBytesFromPieceMessage(byteMessage));
@@ -208,10 +208,16 @@ public class TorrentClient {
 
             boolean hasAllPieces = PeerInfoUtil.hasAllPieces(TorrentClient.host.getBitfield());
 
+            // inc num pieces for loggert
+            TorrentClient.host.incNumPieces();
+
+            log.logFinishPieceDownload(peer.getPeerId(), pieceIndex, TorrentClient.host.getNumPiecesCollected());
+
             if (!hasAllPieces) {
                 sendRequest();
             } else {
                 /* TODO PROB NEED TO DO OTHER STUFF HERE AS WELL!!!!! */
+                writeToLog();
                 createFile();
             }
 
@@ -248,6 +254,11 @@ public class TorrentClient {
 
         public void createFile() throws Exception {
             FileUtil.buildFileFromPieces(TorrentClient.commonFile.getFileSize(), TorrentClient.pieces, "z1.txt");
+        }
+
+        public void writeToLog() throws Exception {
+            log.logDownloadComplete();
+            log.writeAllToLog();
         }
     }
 

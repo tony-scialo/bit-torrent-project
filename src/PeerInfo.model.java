@@ -9,9 +9,14 @@ class PeerInfo {
     private String rawString;
     private char[] bitfield;
     private List<Integer> bitRequested = new ArrayList<>();
+    private int numPiecesCollected = 0;
 
     public PeerInfo() {
 
+    }
+
+    public void incNumPieces() {
+        numPiecesCollected += 1;
     }
 
     public String toString() {
@@ -77,5 +82,13 @@ class PeerInfo {
 
     public List<Integer> getBitRequested() {
         return bitRequested;
+    }
+
+    public int getNumPiecesCollected() {
+        return numPiecesCollected;
+    }
+
+    public void setNumPiecesCollected(int numPiecesCollected) {
+        this.numPiecesCollected = numPiecesCollected;
     }
 }

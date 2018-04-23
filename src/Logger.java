@@ -3,8 +3,12 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Logger {
+
+    private List<String> strLog = new ArrayList<>();
 
     public FileWriter fw;
     public PrintWriter pw;
@@ -12,8 +16,28 @@ public class Logger {
     private int hostId;
 
     public Logger(int hostId) throws Exception {
+        this.hostId = hostId;
+        strLog.add("-------------- NEW LOG " + formatDate(new Date()) + " --------------");
+    }
+
+    public void writeAllToLog() throws Exception {
         try {
-            this.hostId = hostId;
+            fw = new FileWriter(FILENAME + hostId + ".log", true);
+            pw = new PrintWriter(fw);
+            for (String s : strLog) {
+                pw.println(s);
+            }
+            pw.close();
+            fw.close();
+        } catch (Exception e) {
+            System.out.println("Error logging to file. " + e);
+            throw e;
+        }
+
+    }
+
+    public void openAllWriters() throws Exception {
+        try {
             fw = new FileWriter(FILENAME + hostId + ".log", true);
             pw = new PrintWriter(fw);
             pw.println("-------------- NEW LOG " + formatDate(new Date()) + " --------------");
@@ -21,6 +45,26 @@ public class Logger {
             System.out.println("Error in logger constructor. " + e);
             throw e;
         }
+    }
+
+    public void closeAllWriters() throws Exception {
+        try {
+            pw.close();
+            fw.close();
+        } catch (Exception e) {
+            System.out.println("Error closing writers. " + e);
+            throw e;
+        }
+    }
+
+    private void log(String whatToLog) throws Exception {
+        strLog.add(whatToLog);
+        // pw.println(whatToLog);
+    }
+
+    private String formatDate(Date d) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH.mm.ss");
+        return sdf.format(d) + ": ";
     }
 
     public void logTcpFromHost(int peerId) throws Exception {
@@ -68,31 +112,6 @@ public class Logger {
 
     public void logDownloadComplete() throws Exception {
         log(formatDate(new Date()) + " Peer " + hostId + " has downloaded the complete file.");
-    }
-
-    public void closeAllWriters() throws Exception {
-        try {
-            pw.close();
-            fw.close();
-        } catch (Exception e) {
-            System.out.println("Error closing writers. " + e);
-            throw e;
-        }
-    }
-
-    private void log(String whatToLog) throws Exception {
-        try {
-            pw.println(whatToLog);
-        } catch (Exception e) {
-            System.out.println("Error logging to file. " + e);
-            closeAllWriters();
-            throw e;
-        }
-    }
-
-    private String formatDate(Date d) {
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy HH.mm.ss");
-        return sdf.format(d) + ": ";
     }
 
 }
