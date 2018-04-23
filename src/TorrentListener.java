@@ -10,12 +10,14 @@ class TorrentListener {
 
     private static List<PeerInfo> piList;
     private static byte[] file;
+    private static Piece[] pieces;
 
-    public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList, byte[] file) {
+    public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList, byte[] file, Piece[] pieces) {
         this.log = log;
         this.host = host;
         TorrentListener.piList = piList;
         TorrentListener.file = file;
+        TorrentListener.pieces = pieces;
     }
 
     public void listenForRequests() throws Exception {
@@ -92,7 +94,7 @@ class TorrentListener {
                                 bitfieldRecieved(byteMessage, host, connectedPeer);
                                 break;
                             case 6:
-                                requestRecieved();
+                                requestRecieved(byteMessage, host);
                                 break;
                             case 7:
                                 pieceRecieved();
@@ -151,6 +153,7 @@ class TorrentListener {
             log.logInterested(peer.getPeerId());
 
             /*TODO NEED TO KEEP A LIST OF INTERESTED NEIGHBORS AT SOME POINT */
+            sendUnchokeMessage();
 
         }
 
@@ -172,7 +175,15 @@ class TorrentListener {
             sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
         }
 
-        public void requestRecieved() {
+        public void requestRecieved(byte[] byteMessage, PeerInfo host) {
+            FileUtil.printBytesAsString(byteMessage);
+
+            // if it has the piece, send it
+            String pieceIndex = MessageUtil.getPayload(byteMessage);
+            if (PeerInfoUtil.peerHasPiece(host.getBitfield(), Integer.parseInt(pieceIndex))) {
+                sendPiece(pieceIndex, TorrentListener.pieces[Integer.parseInt(pieceIndex)].getData());
+            }
+
             System.out.println("REQUEST");
         }
 
@@ -183,6 +194,12 @@ class TorrentListener {
         public void sendUnchokeMessage() {
             UnchokeMessage um = new UnchokeMessage();
             sendByteMessage(um.createUnchokeMessage());
+        }
+
+        public void sendPiece(String pieceIndex, byte[] data) {
+            PieceMessage pm = new PieceMessage();
+            sendByteMessage(pm.createPieceMessage(pieceIndex, data));
+            System.out.println("PIECE SENT");
         }
 
     }

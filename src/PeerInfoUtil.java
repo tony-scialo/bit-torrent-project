@@ -39,4 +39,37 @@ class PeerInfoUtil {
         return payload.toCharArray();
     }
 
+    public static String determineNextNeededPiece(PeerInfo peer) {
+
+        // find next needed piece
+        int neededIndex = 0;
+        for (int x = 0; x < peer.getBitfield().length; x++) {
+            if (peer.getBitfield()[x] == '0' && !isAlreadyRequested(peer.getBitRequested(), x)) {
+                neededIndex = x;
+                break;
+            }
+        }
+        return Integer.toString(neededIndex);
+    }
+
+    public static boolean isAlreadyRequested(List<Integer> bitRequested, int neededIndex) {
+        for (Integer i : bitRequested) {
+            if (i == neededIndex)
+                return true;
+        }
+
+        return false;
+    }
+
+    public static boolean peerHasPiece(char[] bitfield, int pieceIndex) {
+
+        System.out.println(pieceIndex);
+        System.out.println(bitfield.length);
+
+        if (bitfield[pieceIndex] == '1')
+            return true;
+        else
+            return false;
+    }
+
 }

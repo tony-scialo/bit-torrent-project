@@ -38,16 +38,6 @@ public class TorrentClient {
             System.out.println(FileUtil.convertByteToString(byteMessage));
 
             sendBitfield(host);
-            // byteMessage = (byte[]) in.readObject();
-            // System.out.println(FileUtil.convertByteToString(byteMessage));
-
-            // recieveBitfield(byteMessage, peer);
-
-            // if (isInterested(byteMessage, host)) {
-            //     sendInterested();
-            // } else {
-            //     sendUninterested();
-            // }
 
             while (true) {
 
@@ -58,7 +48,7 @@ public class TorrentClient {
                     chokeRecieved();
                     break;
                 case 1:
-                    unchokeRecieved();
+                    unchokeRecieved(peer);
                     break;
                 case 2:
                     interestedRecieved(log, peer);
@@ -118,17 +108,6 @@ public class TorrentClient {
         }
     }
 
-    public void sendHandshake(PeerInfo host, PeerInfo peer) throws Exception {
-        HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
-        sendByteMessage(hm.createHandshake());
-        log.logTcpFromHost(peer.getPeerId());
-    }
-
-    public void sendBitfield(PeerInfo host) throws Exception {
-        BitfieldMessage bm = new BitfieldMessage();
-        sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
-    }
-
     public boolean isInterested(byte[] byteMessage, PeerInfo host) {
         String payload = MessageUtil.getPayload(byteMessage);
         char[] peerBitfield = BitfieldMessage.convertPayloadToBitfield(payload);
@@ -142,29 +121,20 @@ public class TorrentClient {
         return false;
     }
 
-    public void sendInterested() {
-        InterestedMessage im = new InterestedMessage();
-        sendByteMessage(im.createInterestedMessage());
-    }
-
-    public void sendUninterested() {
-        NotInterestedMessage nm = new NotInterestedMessage();
-        sendByteMessage(nm.createNotInterestedMessage());
-    }
-
     public void chokeRecieved() {
         System.out.println("CHOKE");
     }
 
-    public void unchokeRecieved() {
+    public void unchokeRecieved(PeerInfo peer) {
         System.out.println("UNCHOKE");
+        // if doesn't have the complete file, send request message
+        if (!host.hasFile()) {
+            sendRequest(peer);
+        }
     }
 
     public void interestedRecieved(Logger log, PeerInfo peer) throws Exception {
         log.logInterested(peer.getPeerId());
-
-        /*TODO NEED TO KEEP A LIST OF INTERESTED NEIGHBORS AT SOME POINT */
-
     }
 
     public void notInterestedRecieved(Logger log, PeerInfo peer) throws Exception {
@@ -198,6 +168,33 @@ public class TorrentClient {
 
     public void pieceRecieved() {
         System.out.println("PIECE");
+    }
+
+    public void sendHandshake(PeerInfo host, PeerInfo peer) throws Exception {
+        HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
+        sendByteMessage(hm.createHandshake());
+        log.logTcpFromHost(peer.getPeerId());
+    }
+
+    public void sendBitfield(PeerInfo host) throws Exception {
+        BitfieldMessage bm = new BitfieldMessage();
+        sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
+    }
+
+    public void sendInterested() {
+        InterestedMessage im = new InterestedMessage();
+        sendByteMessage(im.createInterestedMessage());
+    }
+
+    public void sendUninterested() {
+        NotInterestedMessage nm = new NotInterestedMessage();
+        sendByteMessage(nm.createNotInterestedMessage());
+    }
+
+    public void sendRequest(PeerInfo peer) {
+        String neededIndex = PeerInfoUtil.determineNextNeededPiece(peer);
+        RequestMessage rm = new RequestMessage();
+        sendByteMessage(rm.createRequestMessage(neededIndex));
     }
 
 }

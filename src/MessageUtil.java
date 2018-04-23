@@ -18,7 +18,6 @@ public class MessageUtil {
         } else {
             sLength = s;
         }
-
-        return s;
+        return sLength;
     }
 }

@@ -1,3 +1,6 @@
+import java.util.List;
+import java.util.ArrayList;
+
 class PeerInfo {
     private int peerId;
     private String hostName;
@@ -5,6 +8,7 @@ class PeerInfo {
     private boolean file;
     private String rawString;
     private char[] bitfield;
+    private List<Integer> bitRequested = new ArrayList<>();
 
     public PeerInfo() {
 
@@ -65,5 +69,13 @@ class PeerInfo {
 
     public char[] getBitfield() {
         return bitfield;
+    }
+
+    public void setBitRequested(List<Integer> bitRequested) {
+        this.bitRequested = bitRequested;
+    }
+
+    public List<Integer> getBitRequested() {
+        return bitRequested;
     }
 }
