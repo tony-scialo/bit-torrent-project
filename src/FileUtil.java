@@ -76,12 +76,14 @@ public class FileUtil {
 
     }
 
-    public static Piece[] breakIntoPiecesNoFile(byte[] data, long pieceSize) {
-        Piece[] pa = new Piece[calcNumOfPieces(data.length, pieceSize)];
-        for (Piece p : pa) {
-            p = new Piece(null, false);
-        }
+    public static Piece[] breakIntoPiecesNoFile(int filesize, long pieceSize) {
+        Piece[] pa = new Piece[calcNumOfPieces(filesize, pieceSize)];
 
+        System.out.println(pa.length);
+
+        for (int x = 0; x < pa.length; x++) {
+            pa[x] = new Piece();
+        }
         return pa;
     }
 

@@ -59,7 +59,7 @@ public class peerProcess {
             }
         } else {
             file = null;
-            pieces = FileUtil.breakIntoPiecesNoFile(file, commonFile.getPieceSize());
+            pieces = FileUtil.breakIntoPiecesNoFile((int) commonFile.getFileSize(), commonFile.getPieceSize());
         }
 
         // init the logger

@@ -147,8 +147,11 @@ class TorrentListener {
         }
 
         public void interestedRecieved(Logger log, PeerInfo peer) throws Exception {
+            System.out.println("INTERESTED RECIEVED");
             log.logInterested(peer.getPeerId());
-            System.out.println("INTERESTED");
+
+            /*TODO NEED TO KEEP A LIST OF INTERESTED NEIGHBORS AT SOME POINT */
+
         }
 
         public void notInterestedRecieved(Logger log, PeerInfo peer) throws Exception {
@@ -176,5 +179,11 @@ class TorrentListener {
         public void pieceRecieved() {
             System.out.println("PIECE");
         }
+
+        public void sendUnchokeMessage() {
+            UnchokeMessage um = new UnchokeMessage();
+            sendByteMessage(um.createUnchokeMessage());
+        }
+
     }
 }
