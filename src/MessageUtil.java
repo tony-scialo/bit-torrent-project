@@ -20,4 +20,8 @@ public class MessageUtil {
         }
         return sLength;
     }
+
+    public static int getPieceIndexFromPieceMessage(byte[] byteMessage) {
+        return Integer.parseInt(getPayload(byteMessage).substring(0, 3));
+    }
 }

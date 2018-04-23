@@ -9,11 +9,13 @@ public class TorrentClient {
     private static PeerInfo host;
     private static Logger log;
     private static List<PeerInfo> piList;
+    private static Piece[] pieces;
 
-    public TorrentClient(PeerInfo host, Logger log, List<PeerInfo> piList) {
+    public TorrentClient(PeerInfo host, Logger log, List<PeerInfo> piList, Piece[] pieces) {
         TorrentClient.host = host;
         TorrentClient.log = log;
         TorrentClient.piList = piList;
+        TorrentClient.pieces = pieces;
     }
 
     public void sendRequests() throws Exception {
@@ -25,6 +27,7 @@ public class TorrentClient {
             }
 
         } finally {
+            /*TODO SHOULD PROB CLOSE CONNECTIONS AT SOME POINT */
         }
 
     }
@@ -45,18 +48,17 @@ public class TorrentClient {
 
         public void run() {
             try {
-                /* TODO CHANGE HOSTNAME TO NOT LOCALHOST */
                 requestSocket = new Socket(peer.getHostName(), peer.getPort());
                 System.out.println("Connected to " + "localhost" + " in port " + peer.getPort());
                 out = new ObjectOutputStream(requestSocket.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(requestSocket.getInputStream());
 
-                sendHandshake(host, peer);
+                sendHandshake();
                 byteMessage = (byte[]) in.readObject();
                 System.out.println(FileUtil.convertByteToString(byteMessage));
 
-                sendBitfield(host);
+                sendBitfield();
 
                 while (true) {
 
@@ -67,25 +69,25 @@ public class TorrentClient {
                         chokeRecieved();
                         break;
                     case 1:
-                        unchokeRecieved(peer);
+                        unchokeRecieved();
                         break;
                     case 2:
-                        interestedRecieved(log, peer);
+                        interestedRecieved(log);
                         break;
                     case 3:
-                        notInterestedRecieved(log, peer);
+                        notInterestedRecieved(log);
                         break;
                     case 4:
                         haveRecieved();
                         break;
                     case 5:
-                        bitfieldRecieved(byteMessage, peer, host);
+                        bitfieldRecieved(byteMessage);
                         break;
                     case 6:
                         requestRecieved();
                         break;
                     case 7:
-                        pieceRecieved();
+                        pieceRecieved(byteMessage);
                         break;
                     default:
                         System.out.println("WRONG");
@@ -127,13 +129,13 @@ public class TorrentClient {
             }
         }
 
-        public boolean isInterested(byte[] byteMessage, PeerInfo host) {
+        public boolean isInterested(byte[] byteMessage) {
             String payload = MessageUtil.getPayload(byteMessage);
             char[] peerBitfield = BitfieldMessage.convertPayloadToBitfield(payload);
 
             int x = 0;
             for (char c : peerBitfield) {
-                if (c == '1' && host.getBitfield()[x++] == '0')
+                if (c == '1' && TorrentClient.host.getBitfield()[x++] == '0')
                     return true;
             }
 
@@ -144,25 +146,25 @@ public class TorrentClient {
             System.out.println("CHOKE");
         }
 
-        public void unchokeRecieved(PeerInfo peer) {
+        public void unchokeRecieved() {
             System.out.println("UNCHOKE");
             isChoked = false;
             // if doesn't have the complete file, send request message
             if (!host.hasFile()) {
-                sendRequest(peer);
+                sendRequest();
             }
         }
 
-        public void interestedRecieved(Logger log, PeerInfo peer) throws Exception {
+        public void interestedRecieved(Logger log) throws Exception {
             log.logInterested(peer.getPeerId());
         }
 
-        public void notInterestedRecieved(Logger log, PeerInfo peer) throws Exception {
+        public void notInterestedRecieved(Logger log) throws Exception {
             log.logNotInterested(peer.getPeerId());
             System.out.println("NOT INTERESTED");
         }
 
-        public void bitfieldRecieved(byte[] byteMessage, PeerInfo peer, PeerInfo host) {
+        public void bitfieldRecieved(byte[] byteMessage) {
 
             System.out.println("BITFIELD RECIEVED");
 
@@ -171,7 +173,7 @@ public class TorrentClient {
             TorrentClient.piList.get(peerIndex)
                     .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(byteMessage)));
 
-            if (isInterested(byteMessage, host)) {
+            if (isInterested(byteMessage)) {
                 sendInterested();
             } else {
                 sendUninterested();
@@ -186,19 +188,32 @@ public class TorrentClient {
             System.out.println("REQUEST");
         }
 
-        public void pieceRecieved() {
-            System.out.println("PIECE");
+        public void pieceRecieved(byte[] byteMessage) {
+            System.out.println("PIECE RECIEVED");
+
+            // figure out which piece it is
+            int pieceIndex = MessageUtil.getPieceIndexFromPieceMessage(byteMessage);
+
+            // get data and set it to piece
+            TorrentClient.pieces[pieceIndex].setData(Arrays.copyOfRange(byteMessage, 8, byteMessage.length));
+
+            // set has piece to true
+            TorrentClient.pieces[pieceIndex].setHasPiece(true);
+
+            // send another request
+            // sendRequest(peer);
+
         }
 
-        public void sendHandshake(PeerInfo host, PeerInfo peer) throws Exception {
-            HandshakeMessage hm = new HandshakeMessage(host.getPeerId());
+        public void sendHandshake() throws Exception {
+            HandshakeMessage hm = new HandshakeMessage(TorrentClient.host.getPeerId());
             sendByteMessage(hm.createHandshake());
             log.logTcpFromHost(peer.getPeerId());
         }
 
-        public void sendBitfield(PeerInfo host) throws Exception {
+        public void sendBitfield() throws Exception {
             BitfieldMessage bm = new BitfieldMessage();
-            sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
+            sendByteMessage(bm.createBitfieldMessage(TorrentClient.host.getBitfield()));
         }
 
         public void sendInterested() {
@@ -211,7 +226,7 @@ public class TorrentClient {
             sendByteMessage(nm.createNotInterestedMessage());
         }
 
-        public void sendRequest(PeerInfo peer) {
+        public void sendRequest() {
             if (!isChoked) {
                 String neededIndex = PeerInfoUtil.determineNextNeededPiece(peer);
                 RequestMessage rm = new RequestMessage();

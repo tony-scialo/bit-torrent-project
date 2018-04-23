@@ -87,7 +87,7 @@ public class peerProcess {
 
         if (peerIndex != 0) {
             try {
-                TorrentClient tc = new TorrentClient(host, log, piList);
+                TorrentClient tc = new TorrentClient(host, log, piList, pieces);
                 tc.sendRequests();
             } catch (Exception e) {
                 System.out.println("Error in torrent client. " + e);
