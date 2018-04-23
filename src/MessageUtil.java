@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class MessageUtil {
     public static int getMessageType(byte[] message) {
         return Integer.parseInt(FileUtil.convertByteToString(message).substring(4, 5));
@@ -23,8 +25,12 @@ public class MessageUtil {
 
     public static int getPieceIndexFromPieceMessage(byte[] byteMessage) {
 
-        System.out.println("Payload: " + getPayload(byteMessage) + ", " + getPayload(byteMessage).substring(0, 4));
+        FileUtil.printBytesAsString(byteMessage);
 
         return Integer.parseInt(getPayload(byteMessage).substring(0, 4));
+    }
+
+    public static byte[] getBytesFromPieceMessage(byte[] byteMessage) {
+        return Arrays.copyOfRange(byteMessage, 9, byteMessage.length);
     }
 }

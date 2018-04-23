@@ -175,7 +175,7 @@ class TorrentListener {
             sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
         }
 
-        public void requestRecieved(byte[] byteMessage, PeerInfo host) {
+        public void requestRecieved(byte[] byteMessage, PeerInfo host) throws Exception {
             System.out.print("REQUEST: ");
             FileUtil.printBytesAsString(byteMessage);
 
@@ -195,9 +195,12 @@ class TorrentListener {
             sendByteMessage(um.createUnchokeMessage());
         }
 
-        public void sendPiece(String pieceIndex, byte[] data) {
+        public void sendPiece(String pieceIndex, byte[] data) throws Exception {
             System.out.println("PIECE SENT: " + pieceIndex);
             PieceMessage pm = new PieceMessage();
+
+            System.out.println(pm.createPieceMessage(pieceIndex, data));
+
             sendByteMessage(pm.createPieceMessage(pieceIndex, data));
         }
 

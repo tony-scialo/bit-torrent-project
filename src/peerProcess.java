@@ -30,7 +30,7 @@ public class peerProcess {
             piList = parser.parsePeerInfo();
             commonFile = parser.parseCommonFile();
         } catch (Exception e) {
-            System.out.println("Error: exiting program");
+            System.out.println("Error Parsing files. ");
             return;
         }
 
@@ -87,7 +87,7 @@ public class peerProcess {
 
         if (peerIndex != 0) {
             try {
-                TorrentClient tc = new TorrentClient(host, log, piList, pieces);
+                TorrentClient tc = new TorrentClient(host, log, piList, pieces, commonFile);
                 tc.sendRequests();
             } catch (Exception e) {
                 System.out.println("Error in torrent client. " + e);

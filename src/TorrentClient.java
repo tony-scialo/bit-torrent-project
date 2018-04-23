@@ -10,12 +10,14 @@ public class TorrentClient {
     private static Logger log;
     private static List<PeerInfo> piList;
     private static Piece[] pieces;
+    private static Common commonFile;
 
-    public TorrentClient(PeerInfo host, Logger log, List<PeerInfo> piList, Piece[] pieces) {
+    public TorrentClient(PeerInfo host, Logger log, List<PeerInfo> piList, Piece[] pieces, Common commonFile) {
         TorrentClient.host = host;
         TorrentClient.log = log;
         TorrentClient.piList = piList;
         TorrentClient.pieces = pieces;
+        TorrentClient.commonFile = commonFile;
     }
 
     public void sendRequests() throws Exception {
@@ -188,7 +190,7 @@ public class TorrentClient {
             System.out.println("REQUEST");
         }
 
-        public void pieceRecieved(byte[] byteMessage) {
+        public void pieceRecieved(byte[] byteMessage) throws Exception {
             System.out.println("PIECE RECIEVED");
 
             // figure out which piece it is
@@ -196,7 +198,7 @@ public class TorrentClient {
             System.out.println("PieceIndex: " + pieceIndex);
 
             // get data and set it to piece
-            TorrentClient.pieces[pieceIndex].setData(Arrays.copyOfRange(byteMessage, 8, byteMessage.length));
+            TorrentClient.pieces[pieceIndex].setData(MessageUtil.getBytesFromPieceMessage(byteMessage));
 
             // set has piece to true
             TorrentClient.pieces[pieceIndex].setHasPiece(true);
@@ -207,10 +209,10 @@ public class TorrentClient {
             boolean hasAllPieces = PeerInfoUtil.hasAllPieces(TorrentClient.host.getBitfield());
 
             if (!hasAllPieces) {
-                // send another request
                 sendRequest();
             } else {
-                System.out.println("NEED TO FIGURE OUT WHAT TO DO HERE");
+                /* TODO PROB NEED TO DO OTHER STUFF HERE AS WELL!!!!! */
+                createFile();
             }
 
         }
@@ -242,6 +244,10 @@ public class TorrentClient {
                 RequestMessage rm = new RequestMessage();
                 sendByteMessage(rm.createRequestMessage(neededIndex));
             }
+        }
+
+        public void createFile() throws Exception {
+            FileUtil.buildFileFromPieces(TorrentClient.commonFile.getFileSize(), TorrentClient.pieces, "z1.txt");
         }
     }
 

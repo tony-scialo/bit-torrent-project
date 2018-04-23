@@ -91,7 +91,7 @@ public class FileUtil {
         return (int) (Math.ceil(fileSize / (double) pieceSize));
     }
 
-    public static void buildFileFromPieces(long filesize, Piece[] pieces) throws Exception {
+    public static void buildFileFromPieces(long filesize, Piece[] pieces, String filename) throws Exception {
         try {
             byte[] b = new byte[(int) filesize];
 
@@ -108,7 +108,7 @@ public class FileUtil {
                     }
                 }
             }
-            createFileFromBytes(b, "zPLEASE.txt");
+            createFileFromBytes(b, filename);
         } catch (Exception e) {
             System.out.println("Error building file from pieces. " + e);
             throw e;
