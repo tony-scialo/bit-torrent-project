@@ -11,13 +11,16 @@ class TorrentListener {
     private static List<PeerInfo> piList;
     private static byte[] file;
     private static Piece[] pieces;
+    private static Common commonFile;
 
-    public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList, byte[] file, Piece[] pieces) {
+    public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList, byte[] file, Piece[] pieces,
+            Common commonFile) {
         TorrentListener.log = log;
         TorrentListener.host = host;
         TorrentListener.piList = piList;
         TorrentListener.file = file;
         TorrentListener.pieces = pieces;
+        TorrentListener.commonFile = commonFile;
     }
 
     public void listenForRequests() throws Exception {
@@ -50,6 +53,8 @@ class TorrentListener {
         private Logger log;
 
         private byte[] byteMessage;
+
+        private boolean isChoked = true;
 
         public Handler(Socket connection, int no, PeerInfo host, Logger log) {
             this.connection = connection;
@@ -87,7 +92,7 @@ class TorrentListener {
                                 notInterestedRecieved();
                                 break;
                             case 4:
-                                haveRecieved();
+                                haveRecieved(byteMessage);
                                 break;
                             case 5:
                                 bitfieldRecieved(byteMessage);
@@ -143,8 +148,14 @@ class TorrentListener {
             System.out.println("CHOKE");
         }
 
-        public void unchokeRecieved() {
-            System.out.println("UNCHOKE");
+        public void unchokeRecieved() throws Exception {
+            System.out.println("UNCHOKED RECIEVED");
+            isChoked = false;
+            TorrentListener.log.logUnchoked(connectedPeer.getPeerId());
+            // if doesn't have the complete file, send request message
+            if (!host.hasFile()) {
+                sendRequest();
+            }
         }
 
         public void interestedRecieved() throws Exception {
@@ -161,8 +172,19 @@ class TorrentListener {
             System.out.println("NOT INTERESTED");
         }
 
-        public void haveRecieved() {
+        public void haveRecieved(byte[] byteMessage) throws Exception {
             System.out.println("HAVE");
+
+            FileUtil.printBytesAsString(byteMessage);
+
+            int pieceIndex = MessageUtil.getPieceIndexFromPieceMessage(byteMessage);
+            TorrentListener.log.logHave(connectedPeer.getPeerId(), pieceIndex);
+
+            if (!isChoked) {
+                sendRequest();
+            } else {
+                sendInterested();
+            }
         }
 
         public void bitfieldRecieved(byte[] byteMessage) {
@@ -175,7 +197,7 @@ class TorrentListener {
         }
 
         public void requestRecieved(byte[] byteMessage) throws Exception {
-            System.out.print("REQUEST: ");
+            System.out.print("REQUEST RECIEVED: ");
             FileUtil.printBytesAsString(byteMessage);
 
             // if it has the piece, send it
@@ -185,8 +207,36 @@ class TorrentListener {
             }
         }
 
-        public void pieceRecieved() {
-            System.out.println("PIECE");
+        public void pieceRecieved() throws Exception {
+            System.out.println("PIECE RECIEVED");
+
+            // figure out which piece it is
+            int pieceIndex = MessageUtil.getPieceIndexFromPieceMessage(byteMessage);
+
+            // get data and set it to piece
+            TorrentListener.pieces[pieceIndex].setData(MessageUtil.getBytesFromPieceMessage(byteMessage));
+
+            // set has piece to true
+            TorrentListener.pieces[pieceIndex].setHasPiece(true);
+
+            // update its own bitfield
+            TorrentListener.host.getBitfield()[pieceIndex] = '1';
+
+            boolean hasAllPieces = PeerInfoUtil.hasAllPieces(TorrentListener.host.getBitfield());
+
+            // inc num pieces for loggert
+            TorrentListener.host.incNumPieces();
+
+            TorrentListener.log.logFinishPieceDownload(connectedPeer.getPeerId(), pieceIndex,
+                    TorrentListener.host.getNumPiecesCollected());
+
+            if (!hasAllPieces) {
+                sendRequest();
+            } else {
+                /* TODO PROB NEED TO DO OTHER STUFF HERE AS WELL!!!!! */
+                writeToLog();
+                createFile();
+            }
         }
 
         public void sendUnchokeMessage() {
@@ -194,13 +244,34 @@ class TorrentListener {
             sendByteMessage(um.createUnchokeMessage());
         }
 
+        public void sendInterested() {
+            System.out.println("INTERESTED");
+            InterestedMessage im = new InterestedMessage();
+            sendByteMessage(im.createInterestedMessage());
+        }
+
+        public void sendRequest() {
+            System.out.println("REQUEST");
+            if (!isChoked) {
+                String neededIndex = PeerInfoUtil.determineNextNeededPiece(TorrentListener.host);
+                RequestMessage rm = new RequestMessage();
+                sendByteMessage(rm.createRequestMessage(neededIndex));
+            }
+        }
+
         public void sendPiece(String pieceIndex, byte[] data) throws Exception {
             System.out.println("PIECE SENT: " + pieceIndex);
             PieceMessage pm = new PieceMessage();
-
-            System.out.println(pm.createPieceMessage(pieceIndex, data));
-
             sendByteMessage(pm.createPieceMessage(pieceIndex, data));
+        }
+
+        public void createFile() throws Exception {
+            FileUtil.buildFileFromPieces(TorrentListener.commonFile.getFileSize(), TorrentListener.pieces, "z2.txt");
+        }
+
+        public void writeToLog() throws Exception {
+            TorrentListener.log.logDownloadComplete();
+            TorrentListener.log.writeAllToLog();
         }
 
     }

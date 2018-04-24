@@ -97,7 +97,7 @@ public class peerProcess {
         }
 
         try {
-            TorrentListener tl = new TorrentListener(log, host, piList, file, pieces);
+            TorrentListener tl = new TorrentListener(log, host, piList, file, pieces, commonFile);
             System.out.println("Listening on port: " + piList.get(peerIndex).getPort());
             tl.listenForRequests();
         } catch (Exception e) {
