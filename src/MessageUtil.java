@@ -24,9 +24,6 @@ public class MessageUtil {
     }
 
     public static int getPieceIndexFromPieceMessage(byte[] byteMessage) {
-
-        FileUtil.printBytesAsString(byteMessage);
-
         return Integer.parseInt(getPayload(byteMessage).substring(0, 4));
     }
 

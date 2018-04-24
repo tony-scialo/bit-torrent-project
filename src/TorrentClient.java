@@ -75,10 +75,10 @@ public class TorrentClient {
                         unchokeRecieved();
                         break;
                     case 2:
-                        interestedRecieved(log);
+                        interestedRecieved();
                         break;
                     case 3:
-                        notInterestedRecieved(log);
+                        notInterestedRecieved();
                         break;
                     case 4:
                         haveRecieved();
@@ -158,12 +158,12 @@ public class TorrentClient {
             }
         }
 
-        public void interestedRecieved(Logger log) throws Exception {
-            log.logInterested(peer.getPeerId());
+        public void interestedRecieved() throws Exception {
+            TorrentClient.log.logInterested(peer.getPeerId());
         }
 
-        public void notInterestedRecieved(Logger log) throws Exception {
-            log.logNotInterested(peer.getPeerId());
+        public void notInterestedRecieved() throws Exception {
+            TorrentClient.log.logNotInterested(peer.getPeerId());
             System.out.println("NOT INTERESTED");
         }
 
@@ -211,7 +211,8 @@ public class TorrentClient {
             // inc num pieces for loggert
             TorrentClient.host.incNumPieces();
 
-            log.logFinishPieceDownload(peer.getPeerId(), pieceIndex, TorrentClient.host.getNumPiecesCollected());
+            TorrentClient.log.logFinishPieceDownload(peer.getPeerId(), pieceIndex,
+                    TorrentClient.host.getNumPiecesCollected());
 
             if (!hasAllPieces) {
                 sendRequest();
@@ -226,7 +227,7 @@ public class TorrentClient {
         public void sendHandshake() throws Exception {
             HandshakeMessage hm = new HandshakeMessage(TorrentClient.host.getPeerId());
             sendByteMessage(hm.createHandshake());
-            log.logTcpFromHost(peer.getPeerId());
+            TorrentClient.log.logTcpFromHost(peer.getPeerId());
         }
 
         public void sendBitfield() throws Exception {
@@ -257,8 +258,8 @@ public class TorrentClient {
         }
 
         public void writeToLog() throws Exception {
-            log.logDownloadComplete();
-            log.writeAllToLog();
+            TorrentClient.log.logDownloadComplete();
+            TorrentClient.log.writeAllToLog();
         }
     }
 
