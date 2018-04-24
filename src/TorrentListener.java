@@ -315,7 +315,8 @@ class TorrentListener {
         }
 
         public void createFile() throws Exception {
-            FileUtil.buildFileFromPieces(TorrentListener.commonFile.getFileSize(), TorrentListener.pieces, "z2.txt");
+            FileUtil.buildFileFromPieces(TorrentListener.commonFile.getFileSize(), TorrentListener.pieces,
+                    "z" + TorrentListener.host.getPeerId() + ".txt");
         }
 
         public void writeToLog() throws Exception {

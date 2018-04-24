@@ -13,7 +13,7 @@ public class TorrentClient {
     private static Common commonFile;
     private static List<String> strLog = new ArrayList<>();
 
-    private static int numUnchoked = 0;
+    private static List<PeerInfo> unchokeList = new ArrayList<>();
     private static boolean isOptimumUnchoked = false;
 
     public TorrentClient(PeerInfo host, Logger log, List<PeerInfo> piList, Piece[] pieces, Common commonFile) {
@@ -25,6 +25,7 @@ public class TorrentClient {
     }
 
     public void sendRequests() throws Exception {
+        runUnchokeTimer();
         try {
             // send a request for each peer lower than you in the list
             int peerIndex = PeerInfoUtil.findPeerInfoIndex(host.getPeerId(), piList);
@@ -34,6 +35,42 @@ public class TorrentClient {
 
         } finally {
             /*TODO SHOULD PROB CLOSE CONNECTIONS AT SOME POINT */
+        }
+
+    }
+
+    public void runUnchokeTimer() {
+        Timer t = new Timer();
+
+        int sec = commonFile.getUnchoke() * 1000;
+
+        t.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                calcUnchokeNeighbors();
+            }
+        }, 0, sec);
+    }
+
+    public void calcUnchokeNeighbors() {
+        try {
+            if (unchokeList.size() < commonFile.getNumNeighbors()) {
+                while (unchokeList.size() < commonFile.getNumNeighbors()) {
+                    for (PeerInfo p : piList) {
+
+                        // System.out.println(p.printInterestStuff());
+
+                        if (p.isInterested() && !p.isUnchoked()) {
+                            unchokeList.add(p);
+                            p.setUnchoked(true);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // need to calc download speed to determine fastest k neighbors to unchoke, and choke the rest
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
 
     }
@@ -55,7 +92,7 @@ public class TorrentClient {
         public void run() {
             try {
                 requestSocket = new Socket(peer.getHostName(), peer.getPort());
-                System.out.println("Connected to " + "localhost" + " in port " + peer.getPort());
+                System.out.println("Connected to " + peer.getHostName() + " in port " + peer.getPort());
                 out = new ObjectOutputStream(requestSocket.getOutputStream());
                 out.flush();
                 in = new ObjectInputStream(requestSocket.getInputStream());
@@ -172,6 +209,14 @@ public class TorrentClient {
             System.out.println("INTERESTED RECIEVED");
             TorrentClient.log.logInterested(peer.getPeerId());
             peer.setInterested(true);
+
+            while (true) {
+                Thread.sleep(5000);
+                if (canIUnchoke()) {
+                    break;
+                }
+            }
+
             sendUnchokeMessage();
 
         }
@@ -179,7 +224,7 @@ public class TorrentClient {
         public void notInterestedRecieved() throws Exception {
             System.out.println("NOT INTERESTED");
             TorrentClient.log.logNotInterested(peer.getPeerId());
-            peer.setInterested(true);
+            peer.setInterested(false);
         }
 
         public void bitfieldRecieved(byte[] byteMessage) throws Exception {
@@ -299,7 +344,8 @@ public class TorrentClient {
         }
 
         public void createFile() throws Exception {
-            FileUtil.buildFileFromPieces(TorrentClient.commonFile.getFileSize(), TorrentClient.pieces, "z3.txt");
+            FileUtil.buildFileFromPieces(TorrentClient.commonFile.getFileSize(), TorrentClient.pieces,
+                    "z" + TorrentClient.host.getPeerId() + ".txt");
         }
 
         public void writeToLog() throws Exception {
@@ -314,6 +360,18 @@ public class TorrentClient {
                 }
             }
             return -1;
+        }
+
+        public boolean canIUnchoke() {
+            System.out.println(TorrentClient.unchokeList.size());
+
+            for (PeerInfo p : TorrentClient.unchokeList) {
+                if (p.getPeerId() == peer.getPeerId()) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     }
