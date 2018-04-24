@@ -13,8 +13,8 @@ class TorrentListener {
     private static Piece[] pieces;
 
     public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList, byte[] file, Piece[] pieces) {
-        this.log = log;
-        this.host = host;
+        TorrentListener.log = log;
+        TorrentListener.host = host;
         TorrentListener.piList = piList;
         TorrentListener.file = file;
         TorrentListener.pieces = pieces;
@@ -65,7 +65,6 @@ class TorrentListener {
                 in = new ObjectInputStream(connection.getInputStream());
                 try {
                     while (true) {
-                        // byte[] test = (byte[]) in.readObject();
                         byteMessage = (byte[]) in.readObject();
                         if (!recievedHandshake) {
                             connectedPeer = handshakeRecieved(byteMessage);
@@ -82,19 +81,19 @@ class TorrentListener {
                                 unchokeRecieved();
                                 break;
                             case 2:
-                                interestedRecieved(log, connectedPeer);
+                                interestedRecieved();
                                 break;
                             case 3:
-                                notInterestedRecieved(log, connectedPeer);
+                                notInterestedRecieved();
                                 break;
                             case 4:
                                 haveRecieved();
                                 break;
                             case 5:
-                                bitfieldRecieved(byteMessage, host, connectedPeer);
+                                bitfieldRecieved(byteMessage);
                                 break;
                             case 6:
-                                requestRecieved(byteMessage, host);
+                                requestRecieved(byteMessage);
                                 break;
                             case 7:
                                 pieceRecieved();
@@ -148,17 +147,17 @@ class TorrentListener {
             System.out.println("UNCHOKE");
         }
 
-        public void interestedRecieved(Logger log, PeerInfo peer) throws Exception {
+        public void interestedRecieved() throws Exception {
             System.out.println("INTERESTED RECIEVED");
-            log.logInterested(peer.getPeerId());
+            TorrentListener.log.logInterested(connectedPeer.getPeerId());
 
             /*TODO NEED TO KEEP A LIST OF INTERESTED NEIGHBORS AT SOME POINT */
             sendUnchokeMessage();
 
         }
 
-        public void notInterestedRecieved(Logger log, PeerInfo peer) throws Exception {
-            log.logNotInterested(peer.getPeerId());
+        public void notInterestedRecieved() throws Exception {
+            TorrentListener.log.logNotInterested(connectedPeer.getPeerId());
             System.out.println("NOT INTERESTED");
         }
 
@@ -166,22 +165,22 @@ class TorrentListener {
             System.out.println("HAVE");
         }
 
-        public void bitfieldRecieved(byte[] byteMessage, PeerInfo host, PeerInfo conncetedPeer) {
+        public void bitfieldRecieved(byte[] byteMessage) {
             // update bitfield of peer
-            int peerIndex = PeerInfoUtil.findPeerInfoIndex(connectedPeer.getPeerId(), piList);
+            int peerIndex = PeerInfoUtil.findPeerInfoIndex(connectedPeer.getPeerId(), TorrentListener.piList);
             TorrentListener.piList.get(peerIndex)
                     .setBitfield(PeerInfoUtil.createBitfieldFromPayload(MessageUtil.getPayload(byteMessage)));
             BitfieldMessage bm = new BitfieldMessage();
-            sendByteMessage(bm.createBitfieldMessage(host.getBitfield()));
+            sendByteMessage(bm.createBitfieldMessage(TorrentListener.host.getBitfield()));
         }
 
-        public void requestRecieved(byte[] byteMessage, PeerInfo host) throws Exception {
+        public void requestRecieved(byte[] byteMessage) throws Exception {
             System.out.print("REQUEST: ");
             FileUtil.printBytesAsString(byteMessage);
 
             // if it has the piece, send it
             String pieceIndex = MessageUtil.getPayload(byteMessage);
-            if (PeerInfoUtil.peerHasPiece(host.getBitfield(), Integer.parseInt(pieceIndex))) {
+            if (PeerInfoUtil.peerHasPiece(TorrentListener.host.getBitfield(), Integer.parseInt(pieceIndex))) {
                 sendPiece(pieceIndex, TorrentListener.pieces[Integer.parseInt(pieceIndex)].getData());
             }
         }

@@ -60,6 +60,7 @@ public class TorrentClient {
                 sendHandshake();
                 byteMessage = (byte[]) in.readObject();
                 System.out.println(FileUtil.convertByteToString(byteMessage));
+                handshakeRecieved(byteMessage);
 
                 sendBitfield();
 
@@ -145,6 +146,11 @@ public class TorrentClient {
             return false;
         }
 
+        public void handshakeRecieved(byte[] message) {
+            /*TODO do i need to do anything here???? */
+            return;
+        }
+
         public void chokeRecieved() {
             System.out.println("CHOKE");
         }
@@ -167,7 +173,7 @@ public class TorrentClient {
             System.out.println("NOT INTERESTED");
         }
 
-        public void bitfieldRecieved(byte[] byteMessage) {
+        public void bitfieldRecieved(byte[] byteMessage) throws Exception {
 
             System.out.println("BITFIELD RECIEVED");
 
@@ -179,7 +185,12 @@ public class TorrentClient {
             if (isInterested(byteMessage)) {
                 sendInterested();
             } else {
-                sendUninterested();
+                int doHave = doIHaveWhatYouWant();
+                if (doHave != -1) {
+                    sendHave(doHave);
+                } else {
+                    sendUninterested();
+                }
             }
         }
 
@@ -245,6 +256,11 @@ public class TorrentClient {
             sendByteMessage(nm.createNotInterestedMessage());
         }
 
+        public void sendHave(int pieceIndex) throws Exception {
+            HaveMessage hm = new HaveMessage();
+            sendByteMessage(hm.createHaveMessage(Integer.toString(pieceIndex)));
+        }
+
         public void sendRequest() {
             if (!isChoked) {
                 String neededIndex = PeerInfoUtil.determineNextNeededPiece(TorrentClient.host);
@@ -261,6 +277,16 @@ public class TorrentClient {
             TorrentClient.log.logDownloadComplete();
             TorrentClient.log.writeAllToLog();
         }
+
+        public int doIHaveWhatYouWant() throws Exception {
+            for (int x = 0; x < TorrentClient.host.getBitfield().length; x++) {
+                if (peer.getBitfield()[x] != TorrentClient.host.getBitfield()[x]) {
+                    return x;
+                }
+            }
+            return -1;
+        }
+
     }
 
 }
