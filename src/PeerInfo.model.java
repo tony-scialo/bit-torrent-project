@@ -10,6 +10,7 @@ class PeerInfo {
     private char[] bitfield;
     private List<Integer> bitRequested = new ArrayList<>();
     private int numPiecesCollected = 0;
+    private boolean interested = false;
 
     public PeerInfo() {
 
@@ -90,5 +91,13 @@ class PeerInfo {
 
     public void setNumPiecesCollected(int numPiecesCollected) {
         this.numPiecesCollected = numPiecesCollected;
+    }
+
+    public boolean isInterested() {
+        return interested;
+    }
+
+    public void setInterested(boolean interested) {
+        this.interested = interested;
     }
 }

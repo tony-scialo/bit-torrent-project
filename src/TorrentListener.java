@@ -13,6 +13,9 @@ class TorrentListener {
     private static Piece[] pieces;
     private static Common commonFile;
 
+    private static int numUnchoked = 0;
+    private static boolean isOptimumUnchoked = false;
+
     public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList, byte[] file, Piece[] pieces,
             Common commonFile) {
         TorrentListener.log = log;
@@ -161,15 +164,14 @@ class TorrentListener {
         public void interestedRecieved() throws Exception {
             System.out.println("INTERESTED RECIEVED");
             TorrentListener.log.logInterested(connectedPeer.getPeerId());
-
-            /*TODO NEED TO KEEP A LIST OF INTERESTED NEIGHBORS AT SOME POINT */
+            connectedPeer.setInterested(true);
             sendUnchokeMessage();
-
         }
 
         public void notInterestedRecieved() throws Exception {
             TorrentListener.log.logNotInterested(connectedPeer.getPeerId());
             System.out.println("NOT INTERESTED");
+            connectedPeer.setInterested(true);
         }
 
         public void haveRecieved(byte[] byteMessage) throws Exception {
