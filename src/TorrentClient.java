@@ -299,7 +299,7 @@ public class TorrentClient {
         }
 
         public void createFile() throws Exception {
-            FileUtil.buildFileFromPieces(TorrentClient.commonFile.getFileSize(), TorrentClient.pieces, "z1.txt");
+            FileUtil.buildFileFromPieces(TorrentClient.commonFile.getFileSize(), TorrentClient.pieces, "z3.txt");
         }
 
         public void writeToLog() throws Exception {

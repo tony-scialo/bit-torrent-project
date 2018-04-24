@@ -12,12 +12,19 @@ class PeerInfo {
     private int numPiecesCollected = 0;
     private boolean interested = false;
 
+    private int numPiecesUnchoke = 0;
+    private boolean unchoked = false;
+
     public PeerInfo() {
 
     }
 
     public void incNumPieces() {
         numPiecesCollected += 1;
+    }
+
+    public void incNumPiecesUnchoke() {
+        numPiecesUnchoke += 1;
     }
 
     public String toString() {
@@ -27,6 +34,10 @@ class PeerInfo {
         }
 
         return peerId + " " + hostName + " " + port + " " + file + "\n" + "bitfield: " + bf;
+    }
+
+    public String printInterestStuff() {
+        return peerId + ": " + "Interested: " + interested + ", " + "Unchoked: " + unchoked;
     }
 
     public int getPeerId() {
@@ -99,5 +110,21 @@ class PeerInfo {
 
     public void setInterested(boolean interested) {
         this.interested = interested;
+    }
+
+    public int getNumPiecesUnchoke() {
+        return numPiecesUnchoke;
+    }
+
+    public void setNumPiecesUnchoke(int numPiecesUnchoke) {
+        this.numPiecesUnchoke = numPiecesUnchoke;
+    }
+
+    public boolean isUnchoked() {
+        return unchoked;
+    }
+
+    public void setUnchoked(boolean unchoked) {
+        this.unchoked = unchoked;
     }
 }

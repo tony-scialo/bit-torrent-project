@@ -13,7 +13,7 @@ class TorrentListener {
     private static Piece[] pieces;
     private static Common commonFile;
 
-    private static int numUnchoked = 0;
+    private static List<PeerInfo> unchokeList = new ArrayList<>();
     private static boolean isOptimumUnchoked = false;
 
     public TorrentListener(Logger log, PeerInfo host, List<PeerInfo> piList, byte[] file, Piece[] pieces,
@@ -27,6 +27,7 @@ class TorrentListener {
     }
 
     public void listenForRequests() throws Exception {
+        runUnchokeTimer();
         ServerSocket socket = new ServerSocket(host.getPort());
         int clientNum = 0;
         try {
@@ -36,6 +37,41 @@ class TorrentListener {
             }
         } finally {
             socket.close();
+        }
+    }
+
+    public void runUnchokeTimer() {
+        Timer t = new Timer();
+
+        int sec = commonFile.getUnchoke() * 1000;
+
+        t.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                calcUnchokeNeighbors();
+            }
+        }, 0, sec);
+    }
+
+    public void calcUnchokeNeighbors() {
+        try {
+            if (unchokeList.size() < commonFile.getNumNeighbors()) {
+                while (unchokeList.size() < commonFile.getNumNeighbors()) {
+                    for (PeerInfo p : piList) {
+
+                        // System.out.println(p.printInterestStuff());
+
+                        if (p.isInterested() && !p.isUnchoked()) {
+                            unchokeList.add(p);
+                            p.setUnchoked(true);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                // need to calc download speed to determine fastest k neighbors to unchoke, and choke the rest
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
 
     }
@@ -141,8 +177,11 @@ class TorrentListener {
 
         public PeerInfo handshakeRecieved(byte[] message) {
             HandshakeMessage hm = new HandshakeMessage();
-            connectedPeer = new PeerInfo();
-            connectedPeer.setPeerId(Integer.parseInt(hm.parseHandshake(FileUtil.convertByteToString(message))));
+
+            int peerIndex = PeerInfoUtil.findPeerInfoIndex(
+                    Integer.parseInt(hm.parseHandshake(FileUtil.convertByteToString(message))), piList);
+
+            connectedPeer = TorrentListener.piList.get(peerIndex);
             System.out.println(connectedPeer.getPeerId());
             return connectedPeer;
         }
@@ -165,6 +204,14 @@ class TorrentListener {
             System.out.println("INTERESTED RECIEVED");
             TorrentListener.log.logInterested(connectedPeer.getPeerId());
             connectedPeer.setInterested(true);
+
+            while (true) {
+                Thread.sleep(5000);
+                if (canIUnchoke()) {
+                    break;
+                }
+            }
+
             sendUnchokeMessage();
         }
 
@@ -274,6 +321,18 @@ class TorrentListener {
         public void writeToLog() throws Exception {
             TorrentListener.log.logDownloadComplete();
             TorrentListener.log.writeAllToLog();
+        }
+
+        public boolean canIUnchoke() {
+            System.out.println(TorrentListener.unchokeList.size());
+
+            for (PeerInfo p : TorrentListener.unchokeList) {
+                if (p.getPeerId() == connectedPeer.getPeerId()) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     }
